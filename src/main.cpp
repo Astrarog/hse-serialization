@@ -1,4 +1,3 @@
-#include "world.hpp"
 #include "color.hpp"
 #include "planet.hpp"
 

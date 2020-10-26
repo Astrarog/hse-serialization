@@ -6,10 +6,11 @@ project(hse-serialization
             LANGUAGES CXX)
 
 add_library(${PROJECT_NAME}-lib STATIC
+    src/main.cpp
+    src/color.cpp   include/color.hpp
     src/planet.cpp  include/planet.hpp
     src/world.cpp   include/world.hpp
-    src/color.cpp   include/color.hpp
-    src/portal.cpp  include/portal.hpp
+    src/random.cpp  include/random.hpp
 )
 
 add_executable(${PROJECT_NAME}-game

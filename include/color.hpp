@@ -1,5 +1,6 @@
 #ifndef COLOR_HPP
 #define COLOR_HPP
+
 #include <cstdint>
 #include <iostream>
 
@@ -29,6 +30,11 @@ namespace hse
     bool operator<=(const color& firts, const color& second);
     bool operator>(const color& firts, const color& second);
     bool operator>=(const color& firts, const color& second);
+
+    // returns random color
+    color generateColor();
+
+
 
 }
 #endif // COLOR_HPP

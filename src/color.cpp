@@ -99,4 +99,5 @@ namespace hse
     bool operator<=(const color& firts, const color& second) { return firts<second || firts==second;}
     bool operator>(const color& firts, const color& second) { return !(firts<=second);}
     bool operator>=(const color& firts, const color& second) { return firts>second || firts==second;}
+
 }
