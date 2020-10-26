@@ -1,12 +1,18 @@
 #ifndef WORLD_HPP
 #define WORLD_HPP
 
+#include <random>
+#include <set>
+
 namespace hse
 {
-    class world
+    class world_base
     {
-        public:
-           world();
+        static std::mt19937 randomGenerator;
+    public:
+        world_base() = delete;
+
+
     };
 }
 #endif // WORLD_HPP
