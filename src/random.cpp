@@ -19,8 +19,8 @@ namespace hse
 
         using udistr_t = std::uniform_int_distribution<std::string::size_type>;
 
-        static udistr_t pick_letter(0, letters.size());
-        static udistr_t pick_number(0, numbers.size());
+        static udistr_t pick_letter(0, letters.size() - 1);
+        static udistr_t pick_number(0, numbers.size() - 1);
         static udistr_t pick_lenght(4, 9);
 
         std::size_t length = pick_lenght(randomGenerator);
@@ -50,12 +50,32 @@ namespace hse
                     pick_channel(randomGenerator));
     }
 
+    //returns random valid planet type
+    extern planet::TYPE generatePlanetType()
+    {
+        static std::uniform_int_distribution<std::size_t> pick_type(static_cast<std::size_t>(planet::TYPE::EARTH),
+                                                                    static_cast<std::size_t>(planet::TYPE::DEATH));
+        return static_cast<planet::TYPE>(pick_type(randomGenerator));
+    }
+
     //returns random planet with 1..7 empty portals
     extern planet generatePlanet()
     {
         static std::uniform_int_distribution<std::size_t> pick_portals_count(1, 7);
         return planet(generateString(),
                       generateColor(),
-                      pick_portals_count(randomGenerator));
+                      pick_portals_count(randomGenerator),
+                      generatePlanetType());
     }
+
+    //returns random planet with only parent portal
+    extern planet generateHelperPlanet(planet* parent)
+    {
+        return planet(generateString(),
+                      generateColor(),
+                      0,
+                      generatePlanetType(),
+                      parent);
+    }
+
 }

@@ -18,7 +18,13 @@ namespace hse
     // returns random color
     extern color generateColor();
 
-    //returns random planet
+    //returns random valid planet type
+    extern planet::TYPE generatePlanetType();
+
+    //returns random planet with 1..7 empty portals and provided parent
     extern planet generatePlanet();
+
+    //returns random planet with only parent portal
+    extern planet generateHelperPlanet(planet* parent);
 }
 #endif // WORLD_HPP

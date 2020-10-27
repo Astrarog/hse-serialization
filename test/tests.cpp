@@ -103,7 +103,7 @@ void TestPlanetBasic()
 {
     //with simple planet
     {
-        planet data("SomeString", 0x110022, 4);
+        planet data("SomeString", 0x110022, 4, planet::TYPE::EARTH);
         ASSERT_EQUAL(data.name(), "SomeString");
         ASSERT_EQUAL(data.color(), color(0x11, 0x00, 0x22));
         ASSERT_EQUAL(data.empty_portals_count(), 4U);
@@ -115,7 +115,7 @@ void TestPlanetBasic()
 
     //with zero portals
     {
-        planet data("AAA-1234", {123}, 0);
+        planet data("AAA-1234", {123}, 0, planet::TYPE::MOON);
         ASSERT_EQUAL(data.name(), "AAA-1234");
         ASSERT_EQUAL(data.color(), color(123));
         ASSERT_EQUAL(data.empty_portals_count(), 0U);
@@ -125,51 +125,52 @@ void TestPlanetBasic()
 
     // initialization with parent
     {
-        planet parent("SomeString", 0x110022, 1);
+        planet parent("SomeString", 0x110022, 1, planet::TYPE::SATURN);
         ASSERT_EQUAL(parent.name(), "SomeString");
         ASSERT_EQUAL(parent.color(), color(0x11, 0x00, 0x22));
         ASSERT_EQUAL(parent.empty_portals_count(), 1U);
         ASSERT(parent.hasEmptyPortal());
 
-        planet child("OtherString", 0xFFAABB, 2, parent);
+        planet child("OtherString", 0xFFAABB, 2, planet::TYPE::SATURN,  &parent);
         ASSERT_EQUAL(child.name(), "OtherString");
         ASSERT_EQUAL(child.color(), 0xFFAABB);
         ASSERT_EQUAL(child.empty_portals_count(), 2U);
         ASSERT(child.hasEmptyPortal());
 
-//        std::vector<hse::planet*> parent_expected = {&child};
-//        ASSERT_EQUAL(parent.portals(), parent_expected);
-//        ASSERT_EQUAL(parent.empty_portals_count(), 0U);
-//        ASSERT(!(parent.hasEmptyPortal()));
+        std::vector<hse::planet*> parent_expected = {&child};
+        ASSERT_EQUAL(parent.portals(), parent_expected);
+        ASSERT_EQUAL(parent.empty_portals_count(), 0U);
+        ASSERT(!(parent.hasEmptyPortal()));
 
-//        std::vector<hse::planet*> child_expected = {&parent, nullptr, nullptr};
-//        ASSERT_EQUAL(child.portals(), child_expected);
-//        ASSERT_EQUAL(child.empty_portals_count(), 2U);
-//        ASSERT(child.hasEmptyPortal());
+        std::vector<hse::planet*> child_expected = {&parent, nullptr, nullptr};
+        ASSERT_EQUAL(child.portals(), child_expected);
+        ASSERT_EQUAL(child.empty_portals_count(), 2U);
+        ASSERT(child.hasEmptyPortal());
     }
 
-//    // parent initialization with exception
-//    {
-//        planet parent("SomeString", 0x110022, 1);
-//        planet child("OtherString", 0xFFAABB, 2, parent);
+    // parent initialization with exception
+    {
+        planet parent("SomeString", 0x110022, 1, planet::TYPE::MYSTERY);
+        planet child("OtherString", 0xFFAABB, 2, planet::TYPE::EARTH, &parent);
 
-//        std::string expected;
-//        try
-//        {
-//            planet other_child("OtherString", 0xFFAABB, 2, parent);
-//        } catch (std::exception& e) {
-//            expected = e.what();
-//        }
-//        ASSERT_EQUAL(expected, "Can't create child planet. Parent has aleady occupied all portals");
-//    }
+        std::string expected = "Can't create child planet. Parent has aleady occupied all they portals";
+        std::string provided = "";
+        try
+        {
+            planet other_child("OtherString", 0xFFAABB, 2, planet::TYPE::EARTH, &parent);
+        } catch (std::exception& e) {
+            provided = e.what();
+        }
+        ASSERT_EQUAL(expected, provided);
+    }
 }
 
 //binding getEmptyPortal
 void TestPlanetBinding()
 {
-    planet parent1("SomeString", 0x110022, 1);
-    planet parent2("OtherString", 0xFFBBAA, 2);
-    planet parent3("String", 0xFFAABB, 3);
+    planet parent1("SomeString", 0x110022, 1, planet::TYPE::EARTH);
+    planet parent2("OtherString", 0xFFBBAA, 2, planet::TYPE::MOON);
+    planet parent3("String", 0xFFAABB, 3, planet::TYPE::SATURN);
 
     ASSERT(!(parent1.bindWithPortal(parent1)));
     ASSERT(!(bindWithPortal(parent1, parent1)));

@@ -5,6 +5,7 @@
 #include <string>
 #include <vector>
 #include <tuple>
+#include <map>
 #include <cassert>
 
 namespace hse
@@ -18,12 +19,24 @@ namespace hse
 
     class planet
     {
+    public:
+
+        // helper enum for different planet drawings
+        enum class TYPE
+        {
+            EARTH=0, MOON, SATURN, MYSTERY,
+            DEATH // indicates the number of elements in TYPE
+        };
+
     private:
 
         using pool_t = std::vector<planet*>;      //use boost::pool ?
 
         std::string __name;
         color __color;
+
+        //Marker that shows if planet was visited or not
+        bool __is_visited = false;
 
         // count nullptrs in __portals container
         std::size_t __empty_portals_count;
@@ -35,33 +48,41 @@ namespace hse
         // example of container state: [*planet1, *planet2, nullptr, nullptr, nullptr]
         pool_t __portals;
 
+        TYPE __type;
     public:
 
-        std::string name() { return __name; }
-        color color() { return __color; }
-        std::size_t empty_portals_count() { return __empty_portals_count;}
-        pool_t portals() { return __portals; }
+        // helper function for ascii graphisc
+        std::string_view getPlanetImage() const;
+
+        // "Jumps in portal"
+        // return the next planet taken by the index in __portals
+        planet* Travel(std::size_t index)
+        {
+            assert(index<this->portals_count());
+            return __portals[index];
+        }
+
+        //simple getters below
+        std::string name() const { return __name; }
+        color color() const { return __color; }
+        std::size_t empty_portals_count() const { return __empty_portals_count;}
+        std::size_t portals_count() const { return __portals.size();}
+
+        const auto& portals() const & { return __portals; }
+        auto& portals() & { return __portals; }
+        auto&& portals() && { return std::move(__portals); }
+
+        //add empty portal to the end of the container __portals
+        void addEmptyPortal() { __portals.push_back(nullptr); }
 
         // construct planet without any portals binded
         // count==0 is an error;
-        planet(const std::string& name, const class color& _color, std::size_t count)
-            : __name(name), __color(_color), __empty_portals_count(count), __portals(count, nullptr)
-        {}
+        planet(const std::string& name, const class color& _color, std::size_t count, TYPE type)
+            : __name(name), __color(_color), __empty_portals_count(count), __portals(count, nullptr), __type(type){}
 
         // counstruct planet with parent portal
         // there will be count+1 portals in total
-        planet(const std::string& name, const class color& _color, std::size_t count, planet& parent)
-            : __name(name), __color(_color), __empty_portals_count(count), __portals(count+1, nullptr)
-        {
-            assert(count+1 != 0);
-            auto [has, pos] = parent.getEmptyPortalPostion();
-            if(!has)
-            {
-                throw std::logic_error("Can't create child planet. Parent has aleady occupied all they portals");
-            }
-            *pos = this;
-            *(__portals.begin()) = &parent;
-        }
+        planet(const std::string& name, const class color& _color, std::size_t count, TYPE type, planet* parent);
 
 
         // Find the position of unbinded portals
@@ -70,7 +91,13 @@ namespace hse
         // position is undefiend
         std::pair<bool, pool_t::iterator> getEmptyPortalPostion();
 
-        //
+        // returns true is the planet was already visited
+        bool isVisited() const { return __is_visited; }
+
+        // Marks current planet as visited
+        void markVisited() { __is_visited = true;}
+
+        // return is there is empty potal in __portlas
         bool hasEmptyPortal() const { return __empty_portals_count;}
 
         // Binds unoccupied portals if possible on both sides
@@ -91,6 +118,7 @@ namespace hse
     };
 
     extern planet generatePlanet();
+    extern planet generateHelperPlanet();
 
 
 }
