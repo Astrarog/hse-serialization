@@ -45,6 +45,7 @@ namespace hse
             throw std::logic_error("Can't create child planet. Parent has aleady occupied all they portals");
         }
         this->bindWithPortal(*parent);
+        std::cout << "Hello";
     }
 
     std::string_view planet::getPlanetImage() const

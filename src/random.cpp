@@ -68,14 +68,13 @@ namespace hse
                       generatePlanetType());
     }
 
-    //returns random planet with only parent portal
-    extern planet generateHelperPlanet(planet* parent)
+    //returns random planet with only 1 portal
+    extern planet generateHelperPlanet()
     {
         return planet(generateString(),
                       generateColor(),
-                      0,
-                      generatePlanetType(),
-                      parent);
+                      1,
+                      generatePlanetType());
     }
 
 }

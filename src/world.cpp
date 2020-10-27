@@ -95,13 +95,10 @@ namespace hse
         {
             auto* last_planet = pool.back();
             while(last_planet->hasEmptyPortal())
-            {   
+            {
                 //generate planet with only portal to last_planet
-                __galaxy.push_back(generateHelperPlanet(last_planet));
-
-                //[ERROR OCCURED]:
-                //last_planet stores the reference to newlly generated planet
-                //but after the contrution reference becomes dangling
+                __galaxy.push_back(generateHelperPlanet());
+                last_planet->bindWithPortal(__galaxy.back());
             }
         }
 

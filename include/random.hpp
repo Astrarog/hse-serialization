@@ -25,6 +25,6 @@ namespace hse
     extern planet generatePlanet();
 
     //returns random planet with only parent portal
-    extern planet generateHelperPlanet(planet* parent);
+    extern planet generateHelperPlanet(planet& parent);
 }
 #endif // WORLD_HPP
