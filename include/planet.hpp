@@ -80,11 +80,6 @@ namespace hse
         planet(const std::string& name, const class color& _color, std::size_t count, TYPE type)
             : __name(name), __color(_color), __empty_portals_count(count), __portals(count, nullptr), __type(type){}
 
-        // counstruct planet with parent portal
-        // there will be count+1 portals in total
-        planet(const std::string& name, const class color& _color, std::size_t count, TYPE type, planet* parent);
-
-
         // Find the position of unbinded portals
         // Returns the success and the position
         // if the result was unseccessfull then

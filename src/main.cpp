@@ -15,11 +15,11 @@ static std::string_view delimeter =
 R"(======================================================================================================)""\n";
 std::string history =
 R"(    Hello, Commander!                                                                                 )""\n"
-R"(    Humanity fases horrible times. Overpopulation is the major porblem today, so The Supreme Council  )""\n"
+R"(    Humanity faces horrible times. Overpopulation is a major porblem today, so The Supreme Council S  )""\n"
 R"(has decided to deploy the project with a code name "Persistent world" and appoint you as the head of  )""\n"
 R"(this mission.                                                                                         )""\n"
-R"(    You task is to explore the our galaxy and found all planets available for colonisation. You will  )""\n"
-R"(be provided with the best space explorers on our planet.                                              )""\n";
+R"(    Your task is to explore the galaxy and found all planets available for colonization. You will be  )""\n"
+R"(provided with the best space explorers on our planet.                                                 )""\n";
 
 static std::string_view answerYN =  R"(Do you accept this mission? [Yes/No] )";
 
@@ -56,7 +56,6 @@ void playGame()
 
     hse::planet* current = world.home();
     world.markVisited(*current);
-AnotherGame:
     while(world.CountVisited()<world.WorldSize())
     {
         if(world.isHome(*current))

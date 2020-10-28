@@ -35,19 +35,6 @@ namespace hse
         return success;
     }
 
-    planet::planet(const std::string& name, const class color& _color, std::size_t count, TYPE type, planet* parent)
-        : planet(name, _color, count+1, type)
-    {
-        assert(count+1 != 0);
-        bool hasEmptyPortal = parent->hasEmptyPortal();
-        if(!hasEmptyPortal)
-        {
-            throw std::logic_error("Can't create child planet. Parent has aleady occupied all they portals");
-        }
-        this->bindWithPortal(*parent);
-        std::cout << "Hello";
-    }
-
     std::string_view planet::getPlanetImage() const
     {
         switch (__type)
@@ -138,7 +125,18 @@ namespace hse
         R"(              .     @      o                        *       )""\n"
         R"(       o                          *          o           .  )""\n";
         case TYPE::DEATH:
-            return "[[THERE SHOULD BE DEATH STAR HERE]]";
+            return
+        R"(                       8800000CCCCCCCC008                            )""\n"
+        R"(                 8000CCooooCooCoCooCoCoCooCoC08                      )""\n"
+        R"(             8000CoCoCooCoCoCoCoCoCoooCCoCoooCoCCC8                  )""\n"
+        R"(          800CoCooCooCCoCooCoCoCoCooCoCooooCoCoCoCoCo8	            )""\n"
+        R"(        00CoCooCooCooCoCoooCoCoCooCoCoCooooCoooCoooooooC             )""\n"
+        R"(      00CoCooo.       .  .CoCoCoCoCoCooCoooCoCoCoooooooooC           )""\n"            
+        R"(    00CCooo          .     :CoooCoCooCoCoCoCoCCoocooccoo:ooC         )""\n"              
+		R"(  000ooCo   .        .      :CCoooCoCoCooCoCoCoCCooooCooooooC8       )""\n"
+		R"(			       [DEATH STAR IS UNDER CONSTRUCTION]                   )""\n";
+                                       
+                                       
         }
         return "[[WE ARE IN TROUBLE COMMANDOR]]";
     }
