@@ -3,21 +3,21 @@
 
 #include "planet.hpp"
 
-#include <set>
+#include <string>
+#include <list>
 
 namespace hse
 {
 
-    // world with finit number of planets
-    class SimpleWorld
+    class world_base
     {
+    protected:
         // __galaxy.begin() is an initial planet
-        std::vector<planet> __galaxy;
-        std::size_t __count_visited = 0;
-
+        // and beacause of this it is already visited
+        std::list<planet> __galaxy;
+        std::size_t __count_visited = 1;
     public:
-        // World generation
-        SimpleWorld();
+        world_base(){}
 
         // Simple getters
         const auto& galaxy() const & { return __galaxy; }
@@ -26,34 +26,53 @@ namespace hse
 
         planet* home() { return &(__galaxy.front()); }
 
+
         // returns true is the planet was already visited
         bool isHome(const planet& _planet) const { return __galaxy.front()==_planet; }
-
-        // returns the number of planets in world
-        std::size_t WorldSize() const { return __galaxy.size(); }
 
         // returns the number of planets that was already visited
         std::size_t CountVisited() const { return __count_visited; }
 
-        // Marks planet as visited
-        void markVisited(planet& _planet)
-        {
-            if(!(_planet.isVisited()))
-            {
-                ++__count_visited;
-                _planet.markVisited();
-            }
-        }
+        // returns the number of planets in world currently
+        std::size_t WorldSize() const { return __galaxy.size(); }
+
+
+        // Travels to the next planet
+        virtual planet* Travel(planet* _planet, std::size_t idx) = 0;
+
+        // Returns true if victory condition granted
+        virtual bool isVictory() = 0;
 
     };
 
-    // infinitly growing world
-    class InviniteWorld
+
+    // world with finit number of planets
+    // it is guarantee that there will be no unbidnded portals
+    class SimpleWorld: public world_base
     {
 
+    public:
+
+        // World generation
+        SimpleWorld();
+
+        //Travels to the next planet and marks it as visited if needed
+        virtual planet* Travel(planet* _planet, std::size_t idx) override;
+        virtual bool isVictory() override { return this->CountVisited()==this->WorldSize(); }
     };
 
-    //returns random planet
-    planet generatePlanet();
+
+    // infinitly growing tree-like world
+    class InfiniteWorld: public world_base
+    {
+
+    public:
+        InfiniteWorld();
+
+        // Travels to the next planet
+        virtual planet* Travel(planet* _planet, std::size_t idx) override;
+        virtual bool isVictory() override { return false; }
+    };
+
 }
 #endif // WORLD_HPP

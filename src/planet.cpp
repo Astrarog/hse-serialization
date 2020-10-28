@@ -35,6 +35,49 @@ namespace hse
         return success;
     }
 
+    bool planet::bindWithPortal(planet& other, std::size_t idx)
+    {
+        bool success = (*this!=other);
+        bool success_this = (this->__portals[idx] == nullptr);
+        auto position_this = this->__portals.begin() + idx;
+        auto [success_other, position_other] = other.getEmptyPortalPostion();
+        success &= success_this && success_other;
+        if(success)
+        {
+            --this->__empty_portals_count;
+            --other.__empty_portals_count;
+            *position_this = &other;
+            *position_other = this;
+        }
+        return success;
+    }
+
+    std::ostream& operator<<(std::ostream& out, hse::planet& _planet)
+    {
+        out << _planet.getPlanetImage();
+        if(_planet.showNewPlanet())
+        {
+            out << "Comader! We have found a new planet!\n";
+        }
+        out << "NAME : " <<_planet.name()  << "\n";
+        out << "COLOR: " <<_planet.color() << "\n"
+                                             << "\n";
+        out << "Possible next hops:\n";
+        std::size_t index=1;
+        for (auto next: _planet.portals())
+        {
+            out << "  ["<< index++ << "] ";
+            if(next == nullptr || !next->isVisited())
+            {
+                out << "(UNKNOWN)\n";
+            }else
+            {
+                out << next->name() << "\n";
+            }
+        }
+        return out;
+    }
+
     std::string_view planet::getPlanetImage() const
     {
         switch (__type)

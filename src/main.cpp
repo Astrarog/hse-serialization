@@ -23,48 +23,28 @@ R"(provided with the best space explorers on our planet.                        
 
 static std::string_view answerYN =  R"(Do you accept this mission? [Yes/No] )";
 
-std::ostream& operator<<(std::ostream& out, const hse::planet& _planet)
+//class SaveSlotConfig
+//{
+//    std::size_t __games_won = 0;
+
+//private:
+//};
+
+
+//TO DO: The goal and the progress
+void playInviniteGame(hse::world_base& world)
 {
-    out << _planet.getPlanetImage();
-    if(!_planet.isVisited())
-    {
-        out << "Comader! We have found new planet!\n";
-    }
-    out << "NAME : " <<_planet.name()  << "\n";
-    out << "COLOR: " <<_planet.color() << "\n"
-                                         << "\n";
-    out << "Possible next hops:\n";
-    std::size_t index=1;
-    for (auto next: _planet.portals())
-    {
-        out << "  ["<< index++ << "] ";
-        if(next->isVisited())
-        {
-            out << next->name() << "\n";
-        }else
-        {
-            out << "(UNKNOWN)\n";
-        }
-    }
-    return out;
-}
-
-
-void playGame()
-{
-    hse::SimpleWorld world{};
-
     hse::planet* current = world.home();
-    world.markVisited(*current);
-    while(world.CountVisited()<world.WorldSize())
+    while(!world.isVictory())
     {
         if(world.isHome(*current))
         {
             std::cout << "\n"
-                      << "Home sweet home! What could be better.\n"
+                      << "Home sweet home! What could be better!\n"
                       << "\n";
         }
         std::cout << *current << "\n";
+        std::cout << "  [q] Quit" << "\n";
 
         auto checkTravelAnswer = [&current](std::string& answer, std::size_t& index)
                                   {
@@ -82,18 +62,22 @@ AgainTravel:
         std::cout << "Where should we travel? [1";
         if (current->portals_count()>1)
             std::cout << '-' << current->portals_count();
-        std::cout << "] ";
+        std::cout << ", q] ";
         std::getline(std::cin, travel_answer);
+        if (!travel_answer.empty() && std::toupper(travel_answer[0]) == 'Q')
+        {
+            std::exit(0);
+        }
         if(!checkTravelAnswer(travel_answer, travel_planet_index))
         {
             goto AgainTravel;
         }
-        current = current->Travel(travel_planet_index);
-        world.markVisited(*current);
+        current = world.Travel(current, travel_planet_index);
         std::cout << delimeter;
     }
 
 }
+
 
 enum class ANSWER
 {
@@ -133,7 +117,10 @@ YesNoAgain:
                   << "Thank you, Commander! Humanity is in your hands.\n"
                   << delimeter;
 
-        playGame();
+//        playGame();
+        hse::SimpleWorld world{};
+//        hse::InfiniteWorld world{};
+        playInviniteGame(world);
 
         std::cout << delimeter << delimeter << delimeter;
         std::cout << "Congratulation comander!!!\n";

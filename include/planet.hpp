@@ -35,8 +35,11 @@ namespace hse
         std::string __name;
         color __color;
 
-        //Marker that shows if planet was visited or not
+        // Marker that shows if planet was visited or not
         bool __is_visited = false;
+
+        // Output helper field
+        bool __show_new_planet = true;
 
         // count nullptrs in __portals container
         std::size_t __empty_portals_count;
@@ -92,6 +95,9 @@ namespace hse
         // Marks current planet as visited
         void markVisited() { __is_visited = true;}
 
+        // helper output function
+        bool showNewPlanet() { bool answer = __show_new_planet; __show_new_planet = false; return answer;}
+
         // return is there is empty potal in __portlas
         bool hasEmptyPortal() const { return __empty_portals_count;}
 
@@ -101,7 +107,7 @@ namespace hse
 
         // Analog of the function above
         bool bindWithPortal(planet& second) { return hse::bindWithPortal(*this, second); }
-
+        bool bindWithPortal(planet& second, std::size_t idx);
 
 
         bool operator==(const planet& other) const { return this == &other; }
@@ -115,6 +121,7 @@ namespace hse
     extern planet generatePlanet();
     extern planet generateHelperPlanet();
 
+    std::ostream& operator<<(std::ostream& out, hse::planet& _planet);
 
 }
 
