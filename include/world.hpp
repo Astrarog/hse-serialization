@@ -5,6 +5,7 @@
 
 #include <string>
 #include <list>
+#include <iostream>
 
 namespace hse
 {
@@ -14,9 +15,11 @@ namespace hse
     protected:
         // __galaxy.begin() is an initial planet
         // and beacause of this it is already visited
-        std::list<planet> __galaxy;
+        std::vector<planet> __galaxy;
         std::size_t __count_visited = 1;
     public:
+        virtual std::string getPlanetInfo(hse::planet&) const;
+
         world_base(){}
 
         // Simple getters
@@ -24,8 +27,8 @@ namespace hse
         auto& galaxy() & { return __galaxy; }
         auto&& galaxy() && { return std::move(__galaxy); }
 
-        planet* home() { return &(__galaxy.front()); }
-
+        planet& home() { return __galaxy.front(); }
+        std::int32_t homeIdx() const { return 0; }
 
         // returns true is the planet was already visited
         bool isHome(const planet& _planet) const { return __galaxy.front()==_planet; }
@@ -36,9 +39,10 @@ namespace hse
         // returns the number of planets in world currently
         std::size_t WorldSize() const { return __galaxy.size(); }
 
+        planet& planetByIdx(std::size_t idx) {return __galaxy[idx]; }
 
         // Travels to the next planet
-        virtual planet* Travel(planet* _planet, std::size_t idx) = 0;
+        virtual std::int32_t Travel(std::int32_t planet_idx, std::size_t idx) = 0;
 
         // Returns true if victory condition granted
         virtual bool isVictory() = 0;
@@ -57,8 +61,10 @@ namespace hse
         SimpleWorld();
 
         //Travels to the next planet and marks it as visited if needed
-        virtual planet* Travel(planet* _planet, std::size_t idx) override;
+        virtual std::int32_t Travel(std::int32_t, std::size_t) override;
         virtual bool isVictory() override { return this->CountVisited()==this->WorldSize(); }
+
+        virtual std::string getPlanetInfo(hse::planet &_planet) const;
     };
 
 
@@ -70,7 +76,7 @@ namespace hse
         InfiniteWorld();
 
         // Travels to the next planet
-        virtual planet* Travel(planet* _planet, std::size_t idx) override;
+        virtual std::int32_t Travel(std::int32_t, std::size_t) override;
         virtual bool isVictory() override { return false; }
     };
 

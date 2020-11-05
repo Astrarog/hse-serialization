@@ -3,62 +3,105 @@
 
 #include <random>
 #include <cstdint>
-#include <list>
+#include <vector>
 #include <functional>
+#include <sstream>
+#include <algorithm>
+
 
 namespace hse
 {
+//TO DO OUTPUT
+    std::string world_base::getPlanetInfo(hse::planet& _planet) const
+    {
+        std::ostringstream out;
+        out << _planet.getPlanetImage();
+        if(_planet.showNewPlanet())
+        {
+            out << "Comader! We have found a new planet!\n";
+        }
+        out << "NAME : " <<_planet.name()  << "\n";
+        out << "COLOR: " <<_planet.color() << "\n"
+                                             << "\n";
+        out << "Possible next hops:\n\n";
+        std::size_t index=1;
+        for (std::int32_t next_idx: _planet.portals())
+        {
+            out << "  ["<< index++ << "] ";
+            if(next_idx == -1 || !__galaxy[next_idx].isVisited())
+            {
+                out << "(UNKNOWN)\n";
+            }else
+            {
+                out << __galaxy[next_idx].name() << "\n";
+            }
+        }
+        return out.str();
+    }
 
-    planet* random_element(const std::list<planet>& data)
+    std::string SimpleWorld::getPlanetInfo(hse::planet &_planet) const
+    {
+        std::ostringstream out;
+        out << world_base::getPlanetInfo(_planet);
+        out << "\n  [Our intelligence reports that we have found " << CountVisited() << " out of " << WorldSize() << "]\n";
+        return out.str();
+    }
+
+
+    std::int32_t random_element_idx(const std::vector<planet>& data)
     {
         assert(data.size()>0);
-        std::uniform_int_distribution<std::size_t> pick_elem(0, data.size() - 1);
-        return const_cast<planet*>(&(*(next(data.begin(), pick_elem(randomGenerator)))));
+        std::uniform_int_distribution<std::int32_t> pick_elem(0, data.size() - 1);
+        return pick_elem(randomGenerator);
     }
 
-    planet* random_element(const std::list<planet*>& data)
+    std::int32_t random_element_idx(const std::vector<std::int32_t>& data)
     {
-        std::uniform_int_distribution<std::size_t> pick_elem(0, data.size() - 1);
-        return const_cast<planet*>(*(next(data.begin(), pick_elem(randomGenerator))));
+        assert(data.size()>0);
+        std::uniform_int_distribution<std::int32_t> pick_elem(0, data.size() - 1);
+        return data[pick_elem(randomGenerator)];
     }
 
-    std::list<planet*> filter(const std::list<planet*>& data, std::function<bool(const planet &)> predicate)
+    std::vector<std::int32_t> filter(const std::vector<planet>& data, const std::vector<std::int32_t>& idxs, std::function<bool(const planet &)> predicate)
     {
-        std::list<planet*> output;
-        for (auto& elem : data)
+        std::vector<std::int32_t> output;
+        for (std::size_t i=0; i<data.size(); ++i)
         {
-            if (predicate(*elem))
-                output.push_back(const_cast<planet*>(elem));
+            if (predicate(data[i])&& std::find(idxs.begin(), idxs.end(), i) != idxs.end())
+                output.push_back(i);
         }
         return output;
     }
-    std::list<planet*> filter(const std::list<planet>& data, std::function<bool(const planet &)> predicate)
+    std::vector<std::int32_t> filter(const std::vector<planet>& data, std::function<bool(const planet &)> predicate)
     {
-        std::list<planet*> output;
-        for (auto& elem : data)
+        std::vector<std::int32_t> output;
+        for (std::size_t i=0; i<data.size(); ++i)
         {
-            if (predicate(elem))
-                output.push_back(const_cast<planet*>(&elem));
+            if (predicate(data[i]))
+                output.push_back(i);
         }
         return output;
     }
 
-    void connect_planets(planet& _planet, std::list<planet*>& pool)
+    void connect_planets(std::vector<planet>& data, std::int32_t planet_idx, std::vector<std::int32_t>& pool)
     {
+        planet& _planet = data[planet_idx];
         if(!(pool.size()>1 && _planet.hasEmptyPortal()))
             return;
         auto hasEmptyPortal = [](const planet& e){ return e.hasEmptyPortal(); };
         auto notSelf = [&_planet](const planet& e){ return _planet!=e; };
 
-        while((pool = filter(pool, hasEmptyPortal)).size()>1 &&
+        while((pool = filter(data, pool, hasEmptyPortal)).size()>1 &&
               _planet.hasEmptyPortal())
         {
-            auto* other_planet = random_element(filter(pool, notSelf));
-            _planet.bindWithPortal(*other_planet);
+            std::int32_t other_planet_idx = random_element_idx(filter(data, pool, notSelf));
+            planet& other_planet = data[other_planet_idx];
+            bindWithPortal(_planet, planet_idx,
+                           other_planet, other_planet_idx);
         }
-        for(planet* connected_planet :_planet.portals())
+        for(std::int32_t connected_planet_idx :_planet.portals())
         {
-            connect_planets(*connected_planet, pool);
+            connect_planets(data, connected_planet_idx, pool);
         }
     }
 
@@ -72,61 +115,70 @@ namespace hse
         {
             __galaxy.push_back(generatePlanet());
         }
-
         // connecting planets
-        std::list<planet*> connectivity_parts;
+        std::vector<std::int32_t> connectivity_parts;
 
-        auto hasEmptyPortal = [](const planet& e){ return e.hasEmptyPortal(); };
 
         //initialize pool with every planet, because no planets connected yet
-        std::list<planet*> pool = filter(__galaxy, [](const planet&){return true;});
+        std::vector<std::int32_t> pool = filter(__galaxy, [](const planet&){return true;});
         do
         {
-            connectivity_parts.push_back(random_element(pool));
+            connectivity_parts.push_back(random_element_idx(pool));
 
             //pool changes with the connect_planets call
-            connect_planets(*(connectivity_parts.back()),  pool);
+            connect_planets(__galaxy, connectivity_parts.back(),  pool);
         }while(pool.size()>1);
+
 
         //There is one planet left with unbinded portals
         if(pool.size()==1)
         {
-            auto* last_planet = pool.back();
-            while(last_planet->hasEmptyPortal())
+            std::int32_t last_planet_idx = pool.back();
+            while(__galaxy[last_planet_idx].hasEmptyPortal())
             {
                 //generate planet with only portal to last_planet
                 __galaxy.push_back(generateHelperPlanet());
-                last_planet->bindWithPortal(__galaxy.back());
+
+                bindWithPortal(__galaxy[last_planet_idx], last_planet_idx,
+                            __galaxy.back(), __galaxy.size()-1);
             }
         }
 
         // At this parts there should be no empty portals left
-        assert(filter(pool, hasEmptyPortal).size()==0);
+        auto hasEmptyPortal = [](const planet& e){ return e.hasEmptyPortal(); };
+        assert(filter(__galaxy, pool, hasEmptyPortal).size()==0);
 
         // Make graph fully connected if needed
         while (connectivity_parts.size()>1)
         {
-            planet* first = connectivity_parts.back();
+            std::int32_t first_idx = connectivity_parts.back();
+            planet& first = __galaxy[first_idx];
             connectivity_parts.pop_back();
-            planet* second = connectivity_parts.back();
-            first->addEmptyPortal();
-            second->addEmptyPortal();
-            first->bindWithPortal(*second);
+
+            std::int32_t second_idx = connectivity_parts.back();
+            planet& second = __galaxy[second_idx];
+
+            first.addEmptyPortal();
+            second.addEmptyPortal();
+
+            bindWithPortal(first, first_idx,
+                           second, second_idx);
         }
         // World is generated at this point
         __galaxy.front().markVisited();
         __galaxy.front().showNewPlanet();
     }
 
-    planet* SimpleWorld::Travel(planet* _planet, std::size_t idx)
+    std::int32_t SimpleWorld::Travel(std::int32_t current_idx, std::size_t to_idx)
     {
-        planet* next = _planet->Travel(idx);
-        if(!(next->isVisited()))
+        std::int32_t next_idx = __galaxy[current_idx].Travel(to_idx);
+        planet& next = __galaxy[next_idx];
+        if(!(next.isVisited()))
         {
             ++__count_visited;
-            next->markVisited();
+            next.markVisited();
         }
-        return next;
+        return next_idx;
     }
 
 
@@ -138,17 +190,20 @@ namespace hse
         __galaxy.front().showNewPlanet();
     }
 
-    planet* InfiniteWorld::Travel(planet* _planet, std::size_t idx)
+    std::int32_t InfiniteWorld::Travel(std::int32_t current_idx, std::size_t to_idx)
     {
-        planet* next = _planet->Travel(idx);
-        if(next == nullptr)
+        std::int32_t next_idx = __galaxy[current_idx].Travel(to_idx);
+        if(next_idx == -1)
         {
             __galaxy.push_back(generatePlanet());
+
+            planet& current = __galaxy[current_idx];
             planet& new_planet = __galaxy.back();
-            _planet->bindWithPortal(new_planet, idx);
-            next = &new_planet;
-            next -> markVisited();
+            next_idx = __galaxy.size()-1;
+            bindWithPortal(current, current_idx,
+                        new_planet, next_idx );
+            new_planet.markVisited();
         }
-        return next;
+        return next_idx;
     }
 }

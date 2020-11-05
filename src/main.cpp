@@ -3,7 +3,9 @@
 #include <string>
 #include <sstream>
 
-static std::string_view banner =
+namespace  {
+
+constexpr const char* banner =
 R"(__________                    .__          __                 __                        .__       .___)""\n"
 R"(\______   \ ___________  _____|__| _______/  |_  ____   _____/  |_  __  _  _____________|  |    __| _/)""\n"
 R"( |     ___// __ \_  __ \/  ___/  |/  ___/\   __\/ __ \ /    \   __\ \ \/ \/ /  _ \_  __ \  |   / __ | )""\n"
@@ -11,39 +13,50 @@ R"( |    |   \  ___/|  | \/\___ \|  |\___ \  |  | \  ___/|   |  \  |    \     ( 
 R"( |____|    \___  >__|  /____  >__/____  > |__|  \___  >___|  /__|     \/\_/ \____/|__|  |____/\____ | )""\n"
 R"(               \/           \/        \/            \/     \/                                      \/ )""\n";
 
-static std::string_view delimeter =
+constexpr const char* delimeter =
 R"(======================================================================================================)""\n";
-std::string history =
+constexpr const char* history =
 R"(    Hello, Commander!                                                                                 )""\n"
-R"(    Humanity faces horrible times. Overpopulation is a major porblem today, so The Supreme Council S  )""\n"
+R"(    Humanity faces horrible times. Overpopulation is a major porblem today, so The Supreme Council Z  )""\n"
 R"(has decided to deploy the project with a code name "Persistent world" and appoint you as the head of  )""\n"
 R"(this mission.                                                                                         )""\n"
 R"(    Your task is to explore the galaxy and found all planets available for colonization. You will be  )""\n"
 R"(provided with the best space explorers on our planet.                                                 )""\n";
 
-static std::string_view answerYN =  R"(Do you accept this mission? [Yes/No] )";
+constexpr const char * infitityAnons =
+        "According to The Supreme Council's report, you have shown excellent services.\n"
+        "In order to show the respect to you job, you are now available to investigae \n"
+        "the sector XZY-931 with all of its infinite planets. \n";
 
-//class SaveSlotConfig
-//{
-//    std::size_t __games_won = 0;
+constexpr const char* answerYN =  R"(Do you accept this mission? [Yes/No] )";
 
-//private:
-//};
+class progress
+{
+public:
+    bool achievedRespect() { return !(__games_won < 0); }
+    bool firstAchieve(){bool answ = __first_achieved; __first_achieved =false; return answ; }
+    void addWin() {++__games_won;}
+private:
+    std::size_t __games_won = 0;
+    bool __first_achieved = true;
+};
+
 
 
 //TO DO: The goal and the progress
-void playInviniteGame(hse::world_base& world)
+void playGame(hse::world_base& world)
 {
-    hse::planet* current = world.home();
+    hse::planet& current = world.home();
+    std::size_t current_idx = world.homeIdx();
     while(!world.isVictory())
     {
-        if(world.isHome(*current))
+        if(world.isHome(current))
         {
             std::cout << "\n"
                       << "Home sweet home! What could be better!\n"
                       << "\n";
         }
-        std::cout << *current << "\n";
+        std::cout << world.getPlanetInfo(current) << "\n";
         std::cout << "  [q] Quit" << "\n";
 
         auto checkTravelAnswer = [&current](std::string& answer, std::size_t& index)
@@ -51,7 +64,7 @@ void playInviniteGame(hse::world_base& world)
                                       std::istringstream line(answer);
                                       bool success = true && (line >> index);
                                       success &= index > 0;
-                                      success &= (--index) < current->portals_count();
+                                      success &= (--index) < current.portals_count();
                                       return success;
                                   };
 
@@ -60,8 +73,8 @@ void playInviniteGame(hse::world_base& world)
 
 AgainTravel:
         std::cout << "Where should we travel? [1";
-        if (current->portals_count()>1)
-            std::cout << '-' << current->portals_count();
+        if (current.portals_count()>1)
+            std::cout << '-' << current.portals_count();
         std::cout << ", q] ";
         std::getline(std::cin, travel_answer);
         if (!travel_answer.empty() && std::toupper(travel_answer[0]) == 'Q')
@@ -72,7 +85,9 @@ AgainTravel:
         {
             goto AgainTravel;
         }
-        current = world.Travel(current, travel_planet_index);
+        current_idx = world.Travel(current_idx, travel_planet_index);
+        current = world.planetByIdx(current_idx);
+
         std::cout << delimeter;
     }
 
@@ -98,9 +113,13 @@ ANSWER checkYNAnswer(std::string& answer)
         return ANSWER::UNDEF;
 }
 
+}
+
+
 int main()
 {
 
+    progress progress;
 
     std::cout << banner
               << delimeter
@@ -118,14 +137,60 @@ YesNoAgain:
                   << delimeter;
 
 //        playGame();
-        hse::SimpleWorld world{};
-//        hse::InfiniteWorld world{};
-        playInviniteGame(world);
+        if(progress.achievedRespect())
+        {
+            gameModeChoice:
+            if(progress.firstAchieve())
+            {
+                std::cout << infitityAnons;
+            }
+            std::cout << "\nWhat would you choose?\n\n";
+            std::cout << "  [n] Normal mode\n";
+            std::cout << "  [i] Infinite mode\n\n";
+            std::cout << "  [h] Help\n";
+            std::cout << "  [q] Quit\n\n[n,i,h,q] ";
 
-        std::cout << delimeter << delimeter << delimeter;
+            std::string game_mode_answer;
+            std::getline(std::cin, game_mode_answer);
+            if(game_mode_answer.empty())
+            {
+                goto gameModeChoice;
+            }
+            if (std::toupper(game_mode_answer[0]) == 'Q')
+            {
+                std::exit(0);
+            }
+            if (std::toupper(game_mode_answer[0]) == 'I')
+            {
+                hse::InfiniteWorld world{};
+                playGame(world);
+            }else{
+                if (std::toupper(game_mode_answer[0]) == 'H')
+                {
+                    std::cout << infitityAnons;
+                    goto gameModeChoice;
+                }
+                if (std::toupper(game_mode_answer[0]) == 'N')
+                {
+                    std::cout << "The offer is still valid\n";
+                    hse::SimpleWorld world{};
+                    playGame(world);
+                }
+            }
+
+        }else
+        {
+            hse::SimpleWorld world{};
+            playGame(world);
+        }
+
+        progress.addWin();
+        std::cout << delimeter;
         std::cout << "Congratulation comander!!!\n";
         std::cout << "You have successfully complited the mission!\n";
         std::cout << "Nevertheless The Supreme Council have another one.\n";
+        std::cout << delimeter;
+
         goto YesNoAgain;
     }else if(answ == ANSWER::UNDEF)
     {

@@ -3,6 +3,7 @@
 #include "color.hpp"
 
 #include <string>
+#include <string_view>
 #include <vector>
 #include <tuple>
 #include <map>
@@ -15,7 +16,7 @@ namespace hse
 
     // Binds unoccupied portals if possible on both sides
     // and returns the success of operaion
-    bool bindWithPortal(planet& firts, planet& second);
+    bool bindWithPortal(planet& first, std::int32_t firts_idx, planet& second, std::int32_t second_idx);
 
     class planet
     {
@@ -24,13 +25,13 @@ namespace hse
         // helper enum for different planet drawings
         enum class TYPE
         {
-            EARTH=0, MOON, SATURN, MYSTERY,
+            EARTH=0, ASTEROID, MOON, SATURN, MYSTERY,
             DEATH // indicates the number of elements in TYPE
         };
 
     private:
 
-        using pool_t = std::vector<planet*>;      //use boost::pool ?
+        using pool_t = std::vector<std::int32_t>;
 
         std::string __name;
         color __color;
@@ -44,11 +45,11 @@ namespace hse
         // count nullptrs in __portals container
         std::size_t __empty_portals_count;
 
-        // portals represented as pointers
-        // nullptr means that portal exist but
+        // portals represented as indexes in the world_base object
+        // -1 means that portal exist but
         // it is not yet conneted to other planet
         // it is guarantied that there is no portal to self
-        // example of container state: [*planet1, *planet2, nullptr, nullptr, nullptr]
+        // example of container state: [planet_idx1, planet_idx2, -1, -1, -1]
         pool_t __portals;
 
         TYPE __type;
@@ -58,10 +59,10 @@ namespace hse
         std::string_view getPlanetImage() const;
 
         // "Jumps in portal"
-        // return the next planet taken by the index in __portals
-        planet* Travel(std::size_t index)
+        // return the next planet index taken by the index in __portals
+        std::int32_t Travel(std::size_t index)
         {
-            assert(index<this->portals_count());
+            assert(index < this->portals_count());
             return __portals[index];
         }
 
@@ -76,18 +77,16 @@ namespace hse
         auto&& portals() && { return std::move(__portals); }
 
         //add empty portal to the end of the container __portals
-        void addEmptyPortal() { __portals.push_back(nullptr); }
+        void addEmptyPortal() { __portals.push_back(-1); }
 
         // construct planet without any portals binded
         // count==0 is an error;
         planet(const std::string& name, const class color& _color, std::size_t count, TYPE type)
-            : __name(name), __color(_color), __empty_portals_count(count), __portals(count, nullptr), __type(type){}
+            : __name(name), __color(_color), __empty_portals_count(count), __portals(count, -1), __type(type){}
 
-        // Find the position of unbinded portals
-        // Returns the success and the position
-        // if the result was unseccessfull then
-        // position is undefiend
-        std::pair<bool, pool_t::iterator> getEmptyPortalPostion();
+        // Returns the position of unbinded portals if last exist
+        // Otherwise returns the __portals.end()
+        pool_t::iterator getEmptyPortalPostion();
 
         // returns true is the planet was already visited
         bool isVisited() const { return __is_visited; }
@@ -101,19 +100,13 @@ namespace hse
         // return is there is empty potal in __portlas
         bool hasEmptyPortal() const { return __empty_portals_count;}
 
-        // Binds unoccupied portals if possible on both sides
-        // and returns the success of operaion
-        friend bool bindWithPortal(planet& firts, planet& second);
+        // sets portal idx to value and reduces the amount of empty portals
+        // DOES NOT CHECK THE AVAILABILITY TO DO IT
+        void makePortal(std::int32_t);
 
-        // Analog of the function above
-        bool bindWithPortal(planet& second) { return hse::bindWithPortal(*this, second); }
-        bool bindWithPortal(planet& second, std::size_t idx);
-
-
-        bool operator==(const planet& other) const { return this == &other; }
-        bool operator!=(const planet& other) const { return this != &other; }
-        bool operator< (const planet& other) const { return std::tuple(__empty_portals_count, this)
-                                                          < std::tuple(__empty_portals_count, &other); }
+        bool operator==(const planet& other) const { return std::tuple(__name, __color) == std::tuple(other.__name, other.__color); }
+        bool operator!=(const planet& other) const { return std::tuple(__name, __color) != std::tuple(other.__name, other.__color); }
+        bool operator< (const planet& other) const { return std::tuple(__name, __color) <  std::tuple(other.__name, other.__color); }
 
         // return random planet
     };

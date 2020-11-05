@@ -108,7 +108,7 @@ void TestPlanetBasic()
         ASSERT_EQUAL(data.color(), color(0x11, 0x00, 0x22));
         ASSERT_EQUAL(data.empty_portals_count(), 4U);
 
-        std::vector<hse::planet*> expected = {nullptr, nullptr, nullptr, nullptr};
+        std::vector<std::int32_t> expected = {-1, -1, -1, -1};
         ASSERT_EQUAL(data.portals(), expected);
         ASSERT(data.hasEmptyPortal());
     }
@@ -125,30 +125,6 @@ void TestPlanetBasic()
 
 }
 
-//binding getEmptyPortal
-void TestPlanetBinding()
-{
-    planet parent1("SomeString", 0x110022, 1, planet::TYPE::EARTH);
-    planet parent2("OtherString", 0xFFBBAA, 2, planet::TYPE::MOON);
-    planet parent3("String", 0xFFAABB, 3, planet::TYPE::SATURN);
-
-    ASSERT(!(parent1.bindWithPortal(parent1)));
-    ASSERT(!(bindWithPortal(parent1, parent1)));
-
-    ASSERT(bindWithPortal(parent1, parent2));
-    std::vector<hse::planet*> expected1 = {&parent2};
-    std::vector<hse::planet*> expected2 = {&parent1, nullptr};
-    ASSERT_EQUAL(parent1.portals(), expected1);
-    ASSERT_EQUAL(parent2.portals(), expected2);
-
-    ASSERT(!(bindWithPortal(parent1, parent2)));
-
-    ASSERT(bindWithPortal(parent3, parent2));
-    std::vector<hse::planet*> expected21 = {&parent1, &parent3};
-    std::vector<hse::planet*> expected3 = {&parent2, nullptr, nullptr};
-    ASSERT((*(parent3.portals().begin())) == (*(parent3.getEmptyPortalPostion().second - 1)));
-}
-
 
 int main()
 {
@@ -161,5 +137,4 @@ int main()
 
     // Testing Planets
     RUN_TEST(tr, TestPlanetBasic);
-    RUN_TEST(tr, TestPlanetBinding);
 }
