@@ -39,7 +39,8 @@ namespace hse
         // returns the number of planets in world currently
         std::size_t WorldSize() const { return __galaxy.size(); }
 
-        planet& planetByIdx(std::size_t idx) {return __galaxy[idx]; }
+        auto& planetByIdx(std::size_t idx) & { return __galaxy[idx]; }
+        const auto& planetByIdx(std::size_t idx) const & { return __galaxy[idx]; }
 
         // Travels to the next planet
         virtual std::int32_t Travel(std::int32_t planet_idx, std::size_t idx) = 0;

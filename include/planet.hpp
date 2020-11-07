@@ -68,7 +68,7 @@ namespace hse
 
         //simple getters below
         std::string name() const { return __name; }
-        color color() const { return __color; }
+        color Color() const { return __color; }
         std::size_t empty_portals_count() const { return __empty_portals_count;}
         std::size_t portals_count() const { return __portals.size();}
 

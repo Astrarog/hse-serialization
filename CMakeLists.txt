@@ -6,7 +6,7 @@ project(hse-serialization
             LANGUAGES CXX)
 
 #main part of the poject
-add_library(${PROJECT_NAME}-lib STATIC
+add_library(${PROJECT_NAME}-lib
     src/color.cpp   include/color.hpp
     src/planet.cpp  include/planet.hpp
     src/world.cpp   include/world.hpp
@@ -20,12 +20,6 @@ set_target_properties(${PROJECT_NAME}-lib PROPERTIES CXX_EXTENSIONS OFF)
 target_include_directories(${PROJECT_NAME}-lib
     PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include
 )
-
-#list(APPEND CMAKE_MODULE_PATH "C:/dev/lib/boost/lib/cmake")
-
-#find_package(Boost REQUIRED)
-
-#target_link_libraries(${PROJECT_NAME}-lib PUBLIC Boost::headers)
 
 
 #gui part of the project

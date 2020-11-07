@@ -46,10 +46,10 @@ private:
 //TO DO: The goal and the progress
 void playGame(hse::world_base& world)
 {
-    hse::planet& current = world.home();
     std::size_t current_idx = world.homeIdx();
     while(!world.isVictory())
     {
+        hse::planet& current = world.planetByIdx(current_idx);
         if(world.isHome(current))
         {
             std::cout << "\n"
@@ -86,8 +86,6 @@ AgainTravel:
             goto AgainTravel;
         }
         current_idx = world.Travel(current_idx, travel_planet_index);
-        current = world.planetByIdx(current_idx);
-
         std::cout << delimeter;
     }
 

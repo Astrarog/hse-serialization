@@ -21,7 +21,7 @@ namespace hse
             out << "Comader! We have found a new planet!\n";
         }
         out << "NAME : " <<_planet.name()  << "\n";
-        out << "COLOR: " <<_planet.color() << "\n"
+        out << "COLOR: " <<_planet.Color() << "\n"
                                              << "\n";
         out << "Possible next hops:\n\n";
         std::size_t index=1;

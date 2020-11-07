@@ -105,7 +105,7 @@ void TestPlanetBasic()
     {
         planet data("SomeString", 0x110022, 4, planet::TYPE::EARTH);
         ASSERT_EQUAL(data.name(), "SomeString");
-        ASSERT_EQUAL(data.color(), color(0x11, 0x00, 0x22));
+        ASSERT_EQUAL(data.Color(), color(0x11, 0x00, 0x22));
         ASSERT_EQUAL(data.empty_portals_count(), 4U);
 
         std::vector<std::int32_t> expected = {-1, -1, -1, -1};
@@ -117,7 +117,7 @@ void TestPlanetBasic()
     {
         planet data("AAA-1234", {123}, 0, planet::TYPE::MOON);
         ASSERT_EQUAL(data.name(), "AAA-1234");
-        ASSERT_EQUAL(data.color(), color(123));
+        ASSERT_EQUAL(data.Color(), color(123));
         ASSERT_EQUAL(data.empty_portals_count(), 0U);
         ASSERT_EQUAL(data.empty_portals_count(), data.portals().size());
         ASSERT(!(data.hasEmptyPortal()));
