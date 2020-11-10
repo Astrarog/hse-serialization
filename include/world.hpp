@@ -18,7 +18,9 @@ namespace hse
         std::vector<planet> __galaxy;
         std::size_t __count_visited = 1;
     public:
-        virtual std::string getPlanetInfo(hse::planet&) const;
+        virtual std::string getPlanetPrefix(hse::planet&);
+
+        std::vector<std::pair<std::string, std::string>> getPlanetChoises(hse::planet& _planet) const;
 
         world_base(){}
 
@@ -65,7 +67,7 @@ namespace hse
         virtual std::int32_t Travel(std::int32_t, std::size_t) override;
         virtual bool isVictory() override { return this->CountVisited()==this->WorldSize(); }
 
-        virtual std::string getPlanetInfo(hse::planet &_planet) const;
+        virtual std::string getPlanetPrefix(hse::planet &_planet);
     };
 
 

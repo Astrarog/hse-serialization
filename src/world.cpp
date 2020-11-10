@@ -12,38 +12,57 @@
 namespace hse
 {
 //TO DO OUTPUT
-    std::string world_base::getPlanetInfo(hse::planet& _planet) const
+    std::string world_base::getPlanetPrefix(hse::planet& _planet)
     {
         std::ostringstream out;
         out << _planet.getPlanetImage();
-        if(_planet.showNewPlanet())
+        if(isHome(_planet))
+        {
+            out << "\n"
+                << "Home sweet home! What could be better!\n"
+                << "\n";
+        }
+        else if(_planet.showNewPlanet())
         {
             out << "Comader! We have found a new planet!\n";
         }
         out << "NAME : " <<_planet.name()  << "\n";
         out << "COLOR: " <<_planet.Color() << "\n"
                                              << "\n";
-        out << "Possible next hops:\n\n";
-        std::size_t index=1;
-        for (std::int32_t next_idx: _planet.portals())
-        {
-            out << "  ["<< index++ << "] ";
-            if(next_idx == -1 || !__galaxy[next_idx].isVisited())
-            {
-                out << "(UNKNOWN)\n";
-            }else
-            {
-                out << __galaxy[next_idx].name() << "\n";
-            }
-        }
+        out << "Possible next hops:\n";
+
         return out.str();
     }
 
-    std::string SimpleWorld::getPlanetInfo(hse::planet &_planet) const
+    std::vector<std::pair<std::string, std::string>> world_base::getPlanetChoises(hse::planet& _planet) const
+    {
+        std::vector<std::pair<std::string, std::string>> choises;
+        std::size_t index=1;
+        for (std::int32_t next_idx: _planet.portals())
+        {
+            std::string opt, desc;
+
+            std::ostringstream os; os << index++; opt=os.str();
+
+            if(next_idx == -1 || !__galaxy[next_idx].isVisited())
+            {
+                desc = "(UNKNOWN)" ;
+            }else
+            {
+                desc = __galaxy[next_idx].name();
+            }
+
+            choises.push_back({opt, desc});
+        }
+        choises.push_back({"q", "Quit"});
+        return choises;
+    }
+
+    std::string SimpleWorld::getPlanetPrefix(hse::planet &_planet)
     {
         std::ostringstream out;
-        out << world_base::getPlanetInfo(_planet);
-        out << "\n  [Our intelligence reports that we have found " << CountVisited() << " out of " << WorldSize() << "]\n";
+        out << world_base::getPlanetPrefix(_planet);
+        out << "\n  [Our intelligence reports that we have found " << CountVisited() << " out of " << WorldSize() << "]";
         return out.str();
     }
 

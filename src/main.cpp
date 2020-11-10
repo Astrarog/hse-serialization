@@ -1,4 +1,6 @@
 #include "world.hpp"
+#include "input_handler.hpp"
+
 #include <iostream>
 #include <string>
 #include <sstream>
@@ -41,6 +43,12 @@ private:
     bool __first_achieved = true;
 };
 
+[[noreturn]]
+void exit_commandor()
+{
+    std::cout << "Fair enough! Goodbye, Commander.\n";
+    std::exit(0);
+}
 
 
 //TO DO: The goal and the progress
@@ -50,151 +58,94 @@ void playGame(hse::world_base& world)
     while(!world.isVictory())
     {
         hse::planet& current = world.planetByIdx(current_idx);
-        if(world.isHome(current))
-        {
-            std::cout << "\n"
-                      << "Home sweet home! What could be better!\n"
-                      << "\n";
-        }
-        std::cout << world.getPlanetInfo(current) << "\n";
-        std::cout << "  [q] Quit" << "\n";
 
-        auto checkTravelAnswer = [&current](std::string& answer, std::size_t& index)
-                                  {
-                                      std::istringstream line(answer);
-                                      bool success = true && (line >> index);
-                                      success &= index > 0;
-                                      success &= (--index) < current.portals_count();
-                                      return success;
-                                  };
+        hse::input_choises_handler travel_input
+                (world.getPlanetChoises(current), world.getPlanetPrefix(current), "Where should we travel?");
 
-        std::size_t travel_planet_index;
-        std::string travel_answer;
+        std::string answer = std::string(travel_input.perfom());
+        std::size_t next_idx;
+        if (answer=="q")
+        {
+            exit_commandor();
+        }
+        else
+        {
+            std::istringstream in(answer);
+            in >> next_idx;
+            --next_idx;
+        }
 
-AgainTravel:
-        std::cout << "Where should we travel? [1";
-        if (current.portals_count()>1)
-            std::cout << '-' << current.portals_count();
-        std::cout << ", q] ";
-        std::getline(std::cin, travel_answer);
-        if (!travel_answer.empty() && std::toupper(travel_answer[0]) == 'Q')
-        {
-            std::exit(0);
-        }
-        if(!checkTravelAnswer(travel_answer, travel_planet_index))
-        {
-            goto AgainTravel;
-        }
-        current_idx = world.Travel(current_idx, travel_planet_index);
+        current_idx = world.Travel(current_idx, next_idx);
         std::cout << delimeter;
     }
 
-}
-
-
-enum class ANSWER
-{
-    YES, NO, UNDEF
-};
-
-ANSWER checkYNAnswer(std::string& answer)
-{
-    for(auto& letter: answer)
-    {
-        letter = std::toupper(letter);
-    }
-    if (answer == "YES")
-        return ANSWER::YES;
-    else if(answer == "NO")
-        return ANSWER::NO;
-    else
-        return ANSWER::UNDEF;
+    std::cout << '\n' << delimeter;
+    std::cout << "\nCongratulation comander!!!\n";
+    std::cout << "\nYou have successfully complited the mission!\n";
+    std::cout << "\nNevertheless The Supreme Council have another one.\n\n";
 }
 
 }
-
 
 int main()
 {
-
     progress progress;
 
     std::cout << banner
               << delimeter
               << history << '\n';
-    std::string answer;
 
-YesNoAgain:
-    std::cout << answerYN;
-    std::getline(std::cin, answer);
-    auto answ = checkYNAnswer(answer);
-    if(answ == ANSWER::YES)
+    hse::input_choises_handler main_game_input(
+    {{"yes", "Accept the mission"},
+     {"no" , "Decline the mission"},
+     {"q" , "Quit"}},
+                delimeter, answerYN);
+
+    std::string answer;
+    while((answer = main_game_input.perfom())=="yes")
     {
         std::cout << "\n"
                   << "Thank you, Commander! Humanity is in your hands.\n"
                   << delimeter;
 
-//        playGame();
+        std::string mode = "n";
         if(progress.achievedRespect())
         {
-            gameModeChoice:
             if(progress.firstAchieve())
             {
                 std::cout << infitityAnons;
             }
-            std::cout << "\nWhat would you choose?\n\n";
-            std::cout << "  [n] Normal mode\n";
-            std::cout << "  [i] Infinite mode\n\n";
-            std::cout << "  [h] Help\n";
-            std::cout << "  [q] Quit\n\n[n,i,h,q] ";
+            hse::input_choises_handler mode_input(
+            {{"n", "Normal mode"},
+             {"i" , "Infinite mode"},
+             {"h" , "Help"},
+             {"q" , "Quit"}},
+                        "", "");
+            mode = mode_input.perfom();
 
-            std::string game_mode_answer;
-            std::getline(std::cin, game_mode_answer);
-            if(game_mode_answer.empty())
-            {
-                goto gameModeChoice;
-            }
-            if (std::toupper(game_mode_answer[0]) == 'Q')
-            {
-                std::exit(0);
-            }
-            if (std::toupper(game_mode_answer[0]) == 'I')
-            {
-                hse::InfiniteWorld world{};
-                playGame(world);
-            }else{
-                if (std::toupper(game_mode_answer[0]) == 'H')
-                {
-                    std::cout << infitityAnons;
-                    goto gameModeChoice;
-                }
-                if (std::toupper(game_mode_answer[0]) == 'N')
-                {
-                    std::cout << "The offer is still valid\n";
-                    hse::SimpleWorld world{};
-                    playGame(world);
-                }
-            }
-
-        }else
+        }
+        if(mode == "n")
         {
             hse::SimpleWorld world{};
             playGame(world);
+            progress.addWin();
         }
-
-        progress.addWin();
-        std::cout << delimeter;
-        std::cout << "Congratulation comander!!!\n";
-        std::cout << "You have successfully complited the mission!\n";
-        std::cout << "Nevertheless The Supreme Council have another one.\n";
-        std::cout << delimeter;
-
-        goto YesNoAgain;
-    }else if(answ == ANSWER::UNDEF)
-    {
-        goto YesNoAgain;
+        else if (mode == "i")
+        {
+            hse::InfiniteWorld world{};
+            playGame(world);
+            progress.addWin();
+        } else if(mode == "h")
+        {
+            std::cout << infitityAnons;
+        }
+        else if(mode == "q")
+        {
+            exit_commandor();
+        }
     }
-    std::cout << delimeter << "Fair enough! Goodbye, Commander.\n";
 
-    return 0;
+    exit_commandor();
 }
+
+

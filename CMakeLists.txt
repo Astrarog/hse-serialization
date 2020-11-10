@@ -24,7 +24,8 @@ target_include_directories(${PROJECT_NAME}-lib
 
 #gui part of the project
 add_executable(${PROJECT_NAME}-game
-                    src/main.cpp)
+                    src/main.cpp
+                    src/input_handler.cpp src/input_handler.hpp)
 target_compile_features(${PROJECT_NAME}-game PRIVATE cxx_std_20)
 
 set_target_properties(${PROJECT_NAME}-game PROPERTIES CXX_EXTENSIONS OFF)
