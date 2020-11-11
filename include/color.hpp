@@ -4,6 +4,8 @@
 #include <cstdint>
 #include <iostream>
 
+#include <nop/structure.h>
+
 namespace hse
 {
 
@@ -17,6 +19,8 @@ namespace hse
         color(){}
         color(uint32_t c);
         color(uint8_t r, uint8_t g, uint8_t b): r(r), g(g), b(b) {}
+
+        NOP_STRUCTURE(color, r, g, b);
         //auto operator<=>(const color&) const = default;
     };
 

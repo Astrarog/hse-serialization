@@ -7,25 +7,6 @@
 
 namespace hse {
 
-input_choises_handler::input_choises_handler(const std::vector<std::pair<std::string, std::string>>& ch,
-                      const std::string& pr,
-                      const std::string& ii):
-        choises(ch), prefix(pr), input_invitation(ii)
-{
-    all_options = "[";
-    bool first = true;
-    for (const auto& [opt, _] : choises)
-    {
-        if(!first)
-        {
-            all_options+=", ";
-        }
-        all_options+=opt;
-        first = false;
-    }
-    all_options += "]";
-}
-
 
 std::string_view input_choises_handler::perfom() const
 {

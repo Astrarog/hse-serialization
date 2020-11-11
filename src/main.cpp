@@ -1,10 +1,16 @@
 #include "world.hpp"
 #include "input_handler.hpp"
 
+#include <fstream>
 #include <iostream>
 #include <string>
 #include <sstream>
+#include <ios>
 
+#include <nop/serializer.h>
+#include <nop/utility/die.h>
+#include <nop/utility/stream_reader.h>
+#include <nop/utility/stream_writer.h>
 namespace  {
 
 constexpr const char* banner =
@@ -41,7 +47,13 @@ public:
 private:
     std::size_t __games_won = 0;
     bool __first_achieved = true;
+//    bool __last_game_is_infinite;
+    NOP_STRUCTURE(progress, __games_won, __first_achieved);
 };
+
+
+progress global_progress{};
+
 
 [[noreturn]]
 void exit_commandor()
@@ -50,8 +62,44 @@ void exit_commandor()
     std::exit(0);
 }
 
+// Sends fatal errors to std::cerr.
+auto Die() { return nop::Die(std::cerr); }
 
-//TO DO: The goal and the progress
+void save_game(hse::world_base world)
+{
+    using Writer = nop::StreamWriter<std::stringstream>;
+    nop::Serializer<Writer> serializer;
+
+    serializer.Write(global_progress) || Die();
+    serializer.Write(world) || Die();
+
+    std::string data = serializer.writer().stream().str();
+    std::ofstream file("save.profile");
+    file << data;
+}
+
+hse::world_base load_game()
+{
+    std::string data;
+    std::ifstream file("save.profile", std::ios::binary | std::ios::out | std::ios::app);
+    std::string line;
+    while ( getline (file,line) )
+    {
+      data+=line+'\n';
+    }
+
+    std::stringstream data_stream(data);
+    using Reader = nop::StreamReader<std::stringstream>;
+    nop::Deserializer<Reader> deserializer(std::move(data_stream));
+
+    deserializer.Read(&global_progress) || Die();
+
+    hse::world_base ret;
+    deserializer.Read(&ret) || Die();
+
+    return ret;
+}
+
 void playGame(hse::world_base& world)
 {
     std::size_t current_idx = world.homeIdx();
@@ -66,6 +114,15 @@ void playGame(hse::world_base& world)
         std::size_t next_idx;
         if (answer=="q")
         {
+            hse::input_choises_handler save_input(
+            {{"yes", "Save the progress"},
+             {"no" , "Discard the progress"}},
+             "Would you like to save you progress?", "Save?");
+            std::string_view answer = save_input.perfom();
+            if(answer == "yes")
+            {
+                save_game(world);
+            }
             exit_commandor();
         }
         else
@@ -89,8 +146,6 @@ void playGame(hse::world_base& world)
 
 int main()
 {
-    progress progress;
-
     std::cout << banner
               << delimeter
               << history << '\n';
@@ -101,7 +156,7 @@ int main()
      {"q" , "Quit"}},
                 delimeter, answerYN);
 
-    std::string answer;
+    std::string_view answer;
     while((answer = main_game_input.perfom())=="yes")
     {
         std::cout << "\n"
@@ -109,9 +164,10 @@ int main()
                   << delimeter;
 
         std::string mode = "n";
-        if(progress.achievedRespect())
+        hse::world_base world;
+        if(global_progress.achievedRespect())
         {
-            if(progress.firstAchieve())
+            if(global_progress.firstAchieve())
             {
                 std::cout << infitityAnons;
             }
@@ -124,24 +180,27 @@ int main()
             mode = mode_input.perfom();
 
         }
-        if(mode == "n")
-        {
-            hse::SimpleWorld world{};
-            playGame(world);
-            progress.addWin();
-        }
-        else if (mode == "i")
-        {
-            hse::InfiniteWorld world{};
-            playGame(world);
-            progress.addWin();
-        } else if(mode == "h")
+        if(mode == "h")
         {
             std::cout << infitityAnons;
         }
         else if(mode == "q")
         {
             exit_commandor();
+        }
+        else
+        {
+
+            if(mode == "n")
+            {
+                world = hse::SimpleWorld();
+            }
+            else if (mode == "i")
+            {
+                world = hse::InfiniteWorld();
+            }
+            playGame(world);
+            global_progress.addWin();
         }
     }
 

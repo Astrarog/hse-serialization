@@ -17,16 +17,7 @@ namespace hse
         b(c % 256)
     {}
 
-    //    bool static checkHex(std::uint8_t x)
-    //    {
-    //       return (x>='0' && x<='9')||(x>='A' && x<='F');
-    //    }
 
-    //    std::uint8_t static parseHex(std::uint8_t f, std::uint8_t s){
-    //        f = f>='0'&&f<='9'?f-'0':(f-'A')+10;
-    //        s = s>='0'&&s<='9'?s-'0':(s-'A')+10;
-    //        return f*16 + s;
-    //    }
     std::istream& operator>>(std::istream& input, color& rgb)
     {
         std::string format;

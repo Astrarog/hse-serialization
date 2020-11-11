@@ -9,6 +9,8 @@
 #include <map>
 #include <cassert>
 
+#include <nop/structure.h>
+
 namespace hse
 {
 
@@ -53,6 +55,8 @@ namespace hse
         pool_t __portals;
 
         TYPE __type;
+
+        NOP_STRUCTURE(planet, __name, __color, __is_visited, __show_new_planet, __empty_portals_count, __portals, __type);
     public:
 
         // helper function for ascii graphisc
@@ -83,6 +87,9 @@ namespace hse
         // count==0 is an error;
         planet(const std::string& name, const class color& _color, std::size_t count, TYPE type)
             : __name(name), __color(_color), __empty_portals_count(count), __portals(count, -1), __type(type){}
+
+        // needed for nop
+        planet(){}
 
         // Returns the position of unbinded portals if last exist
         // Otherwise returns the __portals.end()

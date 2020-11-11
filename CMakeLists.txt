@@ -5,6 +5,10 @@ project(hse-serialization
             DESCRIPTION "HSE serialization task. Persistent world game."
             LANGUAGES CXX)
 
+# finding libnop
+list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
+find_package(Libnop REQUIRED)
+
 #main part of the poject
 add_library(${PROJECT_NAME}-lib
     src/color.cpp   include/color.hpp
@@ -19,8 +23,8 @@ set_target_properties(${PROJECT_NAME}-lib PROPERTIES CXX_EXTENSIONS OFF)
 
 target_include_directories(${PROJECT_NAME}-lib
     PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include
+    PRIVATE "${LIBNOP_INCLUDE_DIR}"
 )
-
 
 #gui part of the project
 add_executable(${PROJECT_NAME}-game
@@ -32,6 +36,7 @@ set_target_properties(${PROJECT_NAME}-game PROPERTIES CXX_EXTENSIONS OFF)
 
 target_include_directories(${PROJECT_NAME}-game
     PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/include
+    PRIVATE "${LIBNOP_INCLUDE_DIR}"
 )
 
 target_link_libraries(${PROJECT_NAME}-game PRIVATE ${PROJECT_NAME}-lib)

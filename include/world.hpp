@@ -6,6 +6,7 @@
 #include <string>
 #include <list>
 #include <iostream>
+#include <nop/structure.h>
 
 namespace hse
 {
@@ -45,11 +46,12 @@ namespace hse
         const auto& planetByIdx(std::size_t idx) const & { return __galaxy[idx]; }
 
         // Travels to the next planet
-        virtual std::int32_t Travel(std::int32_t planet_idx, std::size_t idx) = 0;
+        virtual std::int32_t Travel(std::int32_t planet_idx, std::size_t to_idx) {return __galaxy[planet_idx].Travel(to_idx); }
 
         // Returns true if victory condition granted
-        virtual bool isVictory() = 0;
+        virtual bool isVictory() const {return true; }
 
+        NOP_STRUCTURE(world_base, __galaxy, __count_visited);
     };
 
 
@@ -65,7 +67,7 @@ namespace hse
 
         //Travels to the next planet and marks it as visited if needed
         virtual std::int32_t Travel(std::int32_t, std::size_t) override;
-        virtual bool isVictory() override { return this->CountVisited()==this->WorldSize(); }
+        virtual bool isVictory() const override { return this->CountVisited()==this->WorldSize(); }
 
         virtual std::string getPlanetPrefix(hse::planet &_planet);
     };
@@ -80,7 +82,7 @@ namespace hse
 
         // Travels to the next planet
         virtual std::int32_t Travel(std::int32_t, std::size_t) override;
-        virtual bool isVictory() override { return false; }
+        virtual bool isVictory() const override { return false; }
     };
 
 }
