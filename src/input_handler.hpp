@@ -4,6 +4,7 @@
 #include <string>
 #include <cstdint>
 #include <string_view>
+#include <utility>
 
 namespace hse {
 
@@ -23,9 +24,8 @@ class input_choises_handler
     // All options as a formated string
     std::string all_options;
 public:
-    template<typename Str1, typename Str2>
-    input_choises_handler(std::vector<std::pair<std::string, std::string>>&& ch, Str1&& pr, Str2&& ii):
-        choises(ch), prefix(pr), input_invitation(ii)
+    input_choises_handler(std::vector<std::pair<std::string, std::string>> ch, std::string pr, std::string ii):
+        choises(std::move(ch)), prefix(std::move(pr)), input_invitation(std::move(ii))
 {
     all_options = "[";
     bool first = true;
@@ -43,7 +43,7 @@ public:
     // Will print prefix, possible options with their descriptions
     // and input invitation. After that there will be an interration
     // with user input until one of the possible option does not occur.
-    std::string_view perfom() const;
+    std::string_view perform() const;
 };
 
 

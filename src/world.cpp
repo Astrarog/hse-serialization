@@ -11,7 +11,7 @@
 
 namespace hse
 {
-//TO DO OUTPUT
+
     std::string world_base::getPlanetPrefix(hse::planet& _planet)
     {
         std::ostringstream out;
@@ -44,12 +44,12 @@ namespace hse
 
             std::ostringstream os; os << index++; opt=os.str();
 
-            if(next_idx == -1 || !__galaxy[next_idx].isVisited())
+            if(next_idx == -1 || !galaxy_[next_idx].isVisited())
             {
                 desc = "(UNKNOWN)" ;
             }else
             {
-                desc = __galaxy[next_idx].name();
+                desc = galaxy_[next_idx].name();
             }
 
             choises.push_back({opt, desc});
@@ -124,28 +124,28 @@ namespace hse
         }
     }
 
-    // generates world with 10..20 planets
-    SimpleWorld::SimpleWorld()
+
+    SimpleWorld::SimpleWorld(std::size_t size)
     {
         // generate planets without connections
-        std::size_t planets_count = std::uniform_int_distribution<std::size_t>(10, 20)(randomGenerator);
+        std::size_t planets_count = size;
 
         for(std::size_t i = 0; i<planets_count; ++i)
         {
-            __galaxy.push_back(generatePlanet());
+            galaxy_.push_back(generatePlanet());
         }
         // connecting planets
         std::vector<std::int32_t> connectivity_parts;
 
 
         //initialize pool with every planet, because no planets connected yet
-        std::vector<std::int32_t> pool = filter(__galaxy, [](const planet&){return true;});
+        std::vector<std::int32_t> pool = filter(galaxy_, [](const planet&){return true;});
         do
         {
             connectivity_parts.push_back(random_element_idx(pool));
 
             //pool changes with the connect_planets call
-            connect_planets(__galaxy, connectivity_parts.back(),  pool);
+            connect_planets(galaxy_, connectivity_parts.back(),  pool);
         }while(pool.size()>1);
 
 
@@ -153,29 +153,29 @@ namespace hse
         if(pool.size()==1)
         {
             std::int32_t last_planet_idx = pool.back();
-            while(__galaxy[last_planet_idx].hasEmptyPortal())
+            while(galaxy_[last_planet_idx].hasEmptyPortal())
             {
                 //generate planet with only portal to last_planet
-                __galaxy.push_back(generateHelperPlanet());
+                galaxy_.push_back(generateHelperPlanet());
 
-                bindWithPortal(__galaxy[last_planet_idx], last_planet_idx,
-                            __galaxy.back(), __galaxy.size()-1);
+                bindWithPortal(galaxy_[last_planet_idx], last_planet_idx,
+                            galaxy_.back(), galaxy_.size()-1);
             }
         }
 
         // At this parts there should be no empty portals left
         auto hasEmptyPortal = [](const planet& e){ return e.hasEmptyPortal(); };
-        assert(filter(__galaxy, pool, hasEmptyPortal).size()==0);
+        assert(filter(galaxy_, pool, hasEmptyPortal).size()==0);
 
         // Make graph fully connected if needed
         while (connectivity_parts.size()>1)
         {
             std::int32_t first_idx = connectivity_parts.back();
-            planet& first = __galaxy[first_idx];
+            planet& first = galaxy_[first_idx];
             connectivity_parts.pop_back();
 
             std::int32_t second_idx = connectivity_parts.back();
-            planet& second = __galaxy[second_idx];
+            planet& second = galaxy_[second_idx];
 
             first.addEmptyPortal();
             second.addEmptyPortal();
@@ -184,17 +184,21 @@ namespace hse
                            second, second_idx);
         }
         // World is generated at this point
-        __galaxy.front().markVisited();
-        __galaxy.front().showNewPlanet();
+        galaxy_.front().markVisited();
+        galaxy_.front().showNewPlanet();
     }
 
+    SimpleWorld::SimpleWorld()
+    {
+        SimpleWorld(std::uniform_int_distribution<std::size_t>(10, 20)(randomGenerator));
+    }
     std::int32_t SimpleWorld::Travel(std::int32_t current_idx, std::size_t to_idx)
     {
-        std::int32_t next_idx = __galaxy[current_idx].Travel(to_idx);
-        planet& next = __galaxy[next_idx];
+        std::int32_t next_idx = galaxy_[current_idx].Travel(to_idx);
+        planet& next = galaxy_[next_idx];
         if(!(next.isVisited()))
         {
-            ++__count_visited;
+            ++count_visited_;
             next.markVisited();
         }
         return next_idx;
@@ -204,21 +208,21 @@ namespace hse
 
     InfiniteWorld::InfiniteWorld()
     {
-        __galaxy.push_back(generatePlanet());
-        __galaxy.front().markVisited();
-        __galaxy.front().showNewPlanet();
+        galaxy_.push_back(generatePlanet());
+        galaxy_.front().markVisited();
+        galaxy_.front().showNewPlanet();
     }
 
     std::int32_t InfiniteWorld::Travel(std::int32_t current_idx, std::size_t to_idx)
     {
-        std::int32_t next_idx = __galaxy[current_idx].Travel(to_idx);
+        std::int32_t next_idx = galaxy_[current_idx].Travel(to_idx);
         if(next_idx == -1)
         {
-            __galaxy.push_back(generatePlanet());
+            galaxy_.push_back(generatePlanet());
 
-            planet& current = __galaxy[current_idx];
-            planet& new_planet = __galaxy.back();
-            next_idx = __galaxy.size()-1;
+            planet& current = galaxy_[current_idx];
+            planet& new_planet = galaxy_.back();
+            next_idx = galaxy_.size()-1;
             bindWithPortal(current, current_idx,
                         new_planet, next_idx );
             new_planet.markVisited();

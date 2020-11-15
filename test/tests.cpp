@@ -1,140 +1,227 @@
-#include "test_runner.hpp"
-
 #include "world.hpp"
-#include "color.hpp"
 
 #include <string>
-#include <sstream>
 
-using namespace hse;
+#define CATCH_CONFIG_MAIN
+#define CATCH_CONFIG_ENABLE_BENCHMARKING
+#include <catch2/catch.hpp>
 
-//testing constructors and structure fields
-void TestColorBasic()
-{
-    ASSERT_EQUAL(color(0xF7ABCDU), color(0xF7U, 0xABU, 0xCDU));
-    ASSERT_EQUAL(color(0x001122U).r, 0x00U);
-    ASSERT_EQUAL(color(0x001122U).g, 0x11U);
-    ASSERT_EQUAL(color(0x001122U).b, 0x22U);
+#include <nop/serializer.h>
+#include <nop/utility/die.h>
+#include <nop/utility/stream_reader.h>
+#include <nop/utility/stream_writer.h>
+
+
+// Sends fatal errors to std::cerr.
+auto Die() { return nop::Die(std::cerr); }
+
+//std::shared_ptr<hse::world_base> load_game()
+//{
+//    std::string data_raw;
+//    std::ifstream file(saveFileName, std::ios::binary | std::ios::out | std::ios::app);
+//    std::string line;
+//    while ( getline (file,line) )
+//    {
+//      data_raw += line+'\n';
+//    }
+
+//    std::stringstream data_stream(data_raw);
+//    using Reader = nop::StreamReader<std::stringstream>;
+//    nop::Deserializer<Reader> deserializer(std::move(data_stream));
+
+//    deserializer.Read(&global_progress) || Die();
+
+//    auto* data = new hse::world_base;
+//    deserializer.Read(data) || Die();
+
+//    return std::shared_ptr<hse::world_base>(data);
+//}
+
+TEST_CASE("Serialization 5") {
+BENCHMARK_ADVANCED("Serrialozation with wolrd of about 5 planet")(Catch::Benchmark::Chronometer meter) {
+    hse::SimpleWorld world(5);
+
+    using Writer = nop::StreamWriter<std::stringstream>;
+    nop::Serializer<Writer> serializer;
+
+    meter.measure([&]
+    {
+        serializer.Write(world) || Die();
+    });
+
+    std::string data = serializer.writer().stream().str();
+
+    std::stringstream ss("serialize-");
+    ss << world.WorldSize() << ".raw";
+    std::ofstream file(ss.str());
+    file << data;
+};
 }
 
-//testing input stream
-void TestColorInput()
-{
-    //ok colors
+TEST_CASE("Serialization 20") {
+BENCHMARK_ADVANCED("Serrialozation with wolrd of about 20 planet")(Catch::Benchmark::Chronometer meter) {
+    hse::SimpleWorld world(20);
+
+    using Writer = nop::StreamWriter<std::stringstream>;
+    nop::Serializer<Writer> serializer;
+
+    meter.measure([&]
     {
-        {
-            std::stringstream stream("#ABCD01");
-            color given;
-            stream >> given;
-            ASSERT_EQUAL(given, color(0xABU, 0xCDU, 0x01U));
-        }
-        {
-            std::stringstream stream("      #ABCD01");
-            color given;
-            stream >> given;
-            ASSERT_EQUAL(given, color(0xABU, 0xCDU, 0x01U));
-        }
-        {
-            std::stringstream stream("#ABCD01           \n  123912 faasd asdjn a");
-            color given;
-            stream >> given;
-            ASSERT_EQUAL(given, color(0xABU, 0xCDU, 0x01U));
-        }
-        {
-            std::stringstream stream("\n#ABCD01 faasd asdjn a");
-            color given;
-            stream >> given;
-            ASSERT_EQUAL(given, color(0xABU, 0xCDU, 0x01U));
-        }
-    }
-    //wrong formats
-    {
-        auto exception_handler = [](const std::string& input)
-            {
-                std::stringstream stream(input);
-                std::string result = "";
-                std::string expected = "Wrong color format: " + input;
-                try
-                {
-                    color given;
-                    stream >> given;
-                }
-                catch (std::exception& e) {
-                    result = e.what();
-                }
-                return expected==result;
-            };
+        serializer.Write(world) || Die();
+    });
 
-        //too small color format
-        ASSERT(exception_handler("#ABCDE"));
+    std::string data = serializer.writer().stream().str();
 
-        //junk before
-        ASSERT(exception_handler("1203j19unf1ufnda#ABCDEF"));
-
-        //junk after
-        ASSERT(exception_handler("#ABCDEFmgig130gm1-9032"));
-
-        //junk inside
-        ASSERT(exception_handler("#ABCkm1g2029me12DEF"));
-
-        //inaceesible letter
-        ASSERT(exception_handler("#0011FG"));
-
-    }
+    std::stringstream ss("serialize-");
+    ss << world.WorldSize() << ".raw";
+    std::ofstream file(ss.str());
+    file << data;
+};
 }
 
-//testing comparison of colors
-void TestColorComparison()
-{
-    color lhs(0x000000), rhs(0x000001);
-    ASSERT(lhs<rhs);
-    ASSERT(lhs<=rhs);
-    ASSERT(lhs!=rhs);
-    ASSERT(!(lhs==rhs));
-    ASSERT(!(lhs>rhs));
-    ASSERT(!(lhs>=rhs));
+TEST_CASE("Serialization 50") {
+BENCHMARK_ADVANCED("Serrialozation with wolrd of about 50 planet")(Catch::Benchmark::Chronometer meter) {
+    hse::SimpleWorld world(50);
 
-    ASSERT(lhs==lhs);
-    ASSERT(rhs==rhs);
+    using Writer = nop::StreamWriter<std::stringstream>;
+    nop::Serializer<Writer> serializer;
+
+    meter.measure([&]
+    {
+        serializer.Write(world) || Die();
+    });
+
+    std::string data = serializer.writer().stream().str();
+
+    std::stringstream ss("serialize-");
+    ss << world.WorldSize() << ".raw";
+    std::ofstream file(ss.str());
+    file << data;
+};
 }
 
-//construction hasEmptyPortal
-void TestPlanetBasic()
-{
-    //with simple planet
+TEST_CASE("Serialization 100") {
+BENCHMARK_ADVANCED("Serrialozation with wolrd of about 100 planet")(Catch::Benchmark::Chronometer meter) {
+    hse::SimpleWorld world(100);
+
+    using Writer = nop::StreamWriter<std::stringstream>;
+    nop::Serializer<Writer> serializer;
+
+    meter.measure([&]
     {
-        planet data("SomeString", 0x110022, 4, planet::TYPE::EARTH);
-        ASSERT_EQUAL(data.name(), "SomeString");
-        ASSERT_EQUAL(data.Color(), color(0x11, 0x00, 0x22));
-        ASSERT_EQUAL(data.empty_portals_count(), 4U);
+        serializer.Write(world) || Die();
+    });
 
-        std::vector<std::int32_t> expected = {-1, -1, -1, -1};
-        ASSERT_EQUAL(data.portals(), expected);
-        ASSERT(data.hasEmptyPortal());
-    }
+    std::string data = serializer.writer().stream().str();
 
-    //with zero portals
-    {
-        planet data("AAA-1234", {123}, 0, planet::TYPE::MOON);
-        ASSERT_EQUAL(data.name(), "AAA-1234");
-        ASSERT_EQUAL(data.Color(), color(123));
-        ASSERT_EQUAL(data.empty_portals_count(), 0U);
-        ASSERT_EQUAL(data.empty_portals_count(), data.portals().size());
-        ASSERT(!(data.hasEmptyPortal()));
-    }
-
+    std::stringstream ss("serialize-");
+    ss << world.WorldSize() << ".raw";
+    std::ofstream file(ss.str());
+    file << data;
+};
 }
 
+TEST_CASE("Serialization 500") {
+BENCHMARK_ADVANCED("Serrialozation with wolrd of about 500 planet")(Catch::Benchmark::Chronometer meter) {
+    hse::SimpleWorld world(500);
 
-int main()
-{
-    TestRunner tr;
+    using Writer = nop::StreamWriter<std::stringstream>;
+    nop::Serializer<Writer> serializer;
 
-    // Testing Color
-    RUN_TEST(tr, TestColorBasic);
-    RUN_TEST(tr, TestColorInput);
-    RUN_TEST(tr, TestColorComparison);
+    meter.measure([&]
+    {
+        serializer.Write(world) || Die();
+    });
 
-    // Testing Planets
-    RUN_TEST(tr, TestPlanetBasic);
+    std::string data = serializer.writer().stream().str();
+
+    std::stringstream ss("serialize-");
+    ss << world.WorldSize() << ".raw";
+    std::ofstream file(ss.str());
+    file << data;
+};
+}
+
+TEST_CASE("Serialization 1500") {
+BENCHMARK_ADVANCED("Serrialozation with wolrd of about 1500 planet")(Catch::Benchmark::Chronometer meter) {
+    hse::SimpleWorld world(1500);
+
+    using Writer = nop::StreamWriter<std::stringstream>;
+    nop::Serializer<Writer> serializer;
+
+    meter.measure([&]
+    {
+        serializer.Write(world) || Die();
+    });
+
+    std::string data = serializer.writer().stream().str();
+
+    std::stringstream ss("serialize-");
+    ss << world.WorldSize() << ".raw";
+    std::ofstream file(ss.str());
+    file << data;
+};
+}
+
+TEST_CASE("Serialization 3200") {
+BENCHMARK_ADVANCED("Serrialozation with wolrd of about 3200 planet")(Catch::Benchmark::Chronometer meter) {
+    hse::SimpleWorld world(3200);
+
+    using Writer = nop::StreamWriter<std::stringstream>;
+    nop::Serializer<Writer> serializer;
+
+    meter.measure([&]
+    {
+        serializer.Write(world) || Die();
+    });
+
+    std::string data = serializer.writer().stream().str();
+
+    std::stringstream ss("serialize-");
+    ss << world.WorldSize() << ".raw";
+    std::ofstream file(ss.str());
+    file << data;
+};
+}
+
+TEST_CASE("Serialization 7000") {
+BENCHMARK_ADVANCED("Serrialozation with wolrd of about 7000 planet")(Catch::Benchmark::Chronometer meter) {
+    hse::SimpleWorld world(7000);
+
+    using Writer = nop::StreamWriter<std::stringstream>;
+    nop::Serializer<Writer> serializer;
+
+    meter.measure([&]
+    {
+        serializer.Write(world) || Die();
+    });
+
+    std::string data = serializer.writer().stream().str();
+
+    std::stringstream ss("serialize-");
+    ss << world.WorldSize() << ".raw";
+    std::ofstream file(ss.str());
+    file << data;
+};
+}
+
+TEST_CASE("Serialization 15000") {
+BENCHMARK_ADVANCED("Serrialozation with wolrd of about 15000 planet")(Catch::Benchmark::Chronometer meter) {
+    hse::SimpleWorld world(15000);
+
+    using Writer = nop::StreamWriter<std::stringstream>;
+    nop::Serializer<Writer> serializer;
+
+    meter.measure([&]
+    {
+        serializer.Write(world) || Die();
+    });
+
+    std::string data = serializer.writer().stream().str();
+
+    std::stringstream ss("serialize-");
+    ss << world.WorldSize() << ".raw";
+    std::ofstream file(ss.str());
+    file << data;
+};
 }

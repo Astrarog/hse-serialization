@@ -12,7 +12,7 @@ namespace hse
     planet::pool_t::iterator planet::getEmptyPortalPostion()
     {
         planet::pool_t::iterator position;
-        position = std::find(__portals.begin(), __portals.end(), -1);
+        position = std::find(portals_.begin(), portals_.end(), -1);
         return position;
     }
 
@@ -20,7 +20,7 @@ namespace hse
     {
         auto position = getEmptyPortalPostion();
         *position = idx;
-        --__empty_portals_count;
+        --empty_portals_count_;
     }
 
     bool bindWithPortal(planet& first, std::int32_t firts_idx, planet& second, std::int32_t second_idx)
@@ -39,7 +39,7 @@ namespace hse
 
     std::string_view planet::getPlanetImage() const
     {
-        switch (__type)
+        switch (type_)
         {
         case TYPE::EARTH:
             return

@@ -23,7 +23,7 @@ set_target_properties(${PROJECT_NAME}-lib PROPERTIES CXX_EXTENSIONS OFF)
 
 target_include_directories(${PROJECT_NAME}-lib
     PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include
-    PRIVATE "${LIBNOP_INCLUDE_DIR}"
+    PRIVATE "${Libnop_INCLUDE_DIR}"
 )
 
 #gui part of the project
@@ -36,10 +36,14 @@ set_target_properties(${PROJECT_NAME}-game PROPERTIES CXX_EXTENSIONS OFF)
 
 target_include_directories(${PROJECT_NAME}-game
     PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/include
-    PRIVATE "${LIBNOP_INCLUDE_DIR}"
+    PRIVATE "${Libnop_INCLUDE_DIR}"
 )
 
+target_link_libraries(${PROJECT_NAME}-lib PRIVATE Libnop::Libnop)
+
 target_link_libraries(${PROJECT_NAME}-game PRIVATE ${PROJECT_NAME}-lib)
+
+target_link_libraries(${PROJECT_NAME}-game PRIVATE Libnop::Libnop)
 
 #testing
 enable_testing()

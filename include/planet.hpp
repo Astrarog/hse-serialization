@@ -35,85 +35,85 @@ namespace hse
 
         using pool_t = std::vector<std::int32_t>;
 
-        std::string __name;
-        color __color;
+        std::string name_;
+        color color_;
 
         // Marker that shows if planet was visited or not
-        bool __is_visited = false;
+        bool is_visited_ = false;
 
         // Output helper field
-        bool __show_new_planet = true;
+        bool show_new_planet_ = true;
 
-        // count nullptrs in __portals container
-        std::size_t __empty_portals_count;
+        // count nullptrs in portals_ container
+        std::size_t empty_portals_count_;
 
         // portals represented as indexes in the world_base object
         // -1 means that portal exist but
         // it is not yet conneted to other planet
         // it is guarantied that there is no portal to self
         // example of container state: [planet_idx1, planet_idx2, -1, -1, -1]
-        pool_t __portals;
+        pool_t portals_;
 
-        TYPE __type;
+        TYPE type_;
 
-        NOP_STRUCTURE(planet, __name, __color, __is_visited, __show_new_planet, __empty_portals_count, __portals, __type);
+        NOP_STRUCTURE(planet, name_, color_, is_visited_, show_new_planet_, empty_portals_count_, portals_, type_);
     public:
 
         // helper function for ascii graphisc
         std::string_view getPlanetImage() const;
 
         // "Jumps in portal"
-        // return the next planet index taken by the index in __portals
+        // return the next planet index taken by the index in portals_
         std::int32_t Travel(std::size_t index)
         {
             assert(index < this->portals_count());
-            return __portals[index];
+            return portals_[index];
         }
 
         //simple getters below
-        std::string name() const { return __name; }
-        color Color() const { return __color; }
-        std::size_t empty_portals_count() const { return __empty_portals_count;}
-        std::size_t portals_count() const { return __portals.size();}
+        std::string name() const { return name_; }
+        color Color() const { return color_; }
+        std::size_t empty_portals_count() const { return empty_portals_count_;}
+        std::size_t portals_count() const { return portals_.size();}
 
-        const auto& portals() const & { return __portals; }
-        auto& portals() & { return __portals; }
-        auto&& portals() && { return std::move(__portals); }
+        const auto& portals() const & { return portals_; }
+        auto& portals() & { return portals_; }
+        auto&& portals() && { return std::move(portals_); }
 
-        //add empty portal to the end of the container __portals
-        void addEmptyPortal() { __portals.push_back(-1); }
+        //add empty portal to the end of the container portals_
+        void addEmptyPortal() { portals_.push_back(-1); }
 
         // construct planet without any portals binded
         // count==0 is an error;
-        planet(const std::string& name, const class color& _color, std::size_t count, TYPE type)
-            : __name(name), __color(_color), __empty_portals_count(count), __portals(count, -1), __type(type){}
+        planet(const std::string& name, const color& _color, std::size_t count, TYPE type)
+            : name_(name), color_(_color), empty_portals_count_(count), portals_(count, -1), type_(type){}
 
         // needed for nop
         planet(){}
 
         // Returns the position of unbinded portals if last exist
-        // Otherwise returns the __portals.end()
+        // Otherwise returns the portals_.end()
         pool_t::iterator getEmptyPortalPostion();
 
         // returns true is the planet was already visited
-        bool isVisited() const { return __is_visited; }
+        bool isVisited() const { return is_visited_; }
 
         // Marks current planet as visited
-        void markVisited() { __is_visited = true;}
+        void markVisited() { is_visited_ = true;}
 
         // helper output function
-        bool showNewPlanet() { bool answer = __show_new_planet; __show_new_planet = false; return answer;}
+        bool showNewPlanet() { bool answer = show_new_planet_; show_new_planet_ = false; return answer;}
 
         // return is there is empty potal in __portlas
-        bool hasEmptyPortal() const { return __empty_portals_count;}
+        bool hasEmptyPortal() const { return empty_portals_count_;}
 
         // sets portal idx to value and reduces the amount of empty portals
         // DOES NOT CHECK THE AVAILABILITY TO DO IT
         void makePortal(std::int32_t);
 
-        bool operator==(const planet& other) const { return std::tuple(__name, __color) == std::tuple(other.__name, other.__color); }
-        bool operator!=(const planet& other) const { return std::tuple(__name, __color) != std::tuple(other.__name, other.__color); }
-        bool operator< (const planet& other) const { return std::tuple(__name, __color) <  std::tuple(other.__name, other.__color); }
+        bool operator==(const planet& other) const { return std::tuple(name_, color_) == std::tuple(other.name_, other.color_); }
+        bool operator!=(const planet& other) const { return std::tuple(name_, color_) != std::tuple(other.name_, other.color_); }
+        bool operator< (const planet& other) const { return std::tuple(name_, color_) <  std::tuple(other.name_, other.color_); }
 
         // return random planet
     };

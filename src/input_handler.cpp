@@ -8,7 +8,7 @@
 namespace hse {
 
 
-std::string_view input_choises_handler::perfom() const
+std::string_view input_choises_handler::perform() const
 {
     std::cout << prefix << '\n' << '\n';
 
