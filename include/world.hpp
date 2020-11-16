@@ -11,20 +11,25 @@
 namespace hse
 {
 
-    class world_base
+    class world
     {
     protected:
         // galaxy_.begin() is an initial planet
         // and beacause of this it is already visited
         std::vector<planet> galaxy_;
         std::size_t count_visited_ = 1;
+        std::size_t count_unbinded_portals_ = 0;
+
     public:
-        virtual std::string getPlanetPrefix(hse::planet&);
+        std::string getPlanetPrefix(hse::planet&);
 
         std::vector<std::pair<std::string, std::string>> getPlanetChoises(hse::planet& _planet) const;
 
-        world_base(){}
-        virtual ~world_base() = default;
+        world();
+        world(std::size_t);
+
+        // adds the provided number of planets to currnet world
+        void generatePlanets(std::size_t);
 
         // Simple getters
         const auto& galaxy() const & { return galaxy_; }
@@ -41,59 +46,27 @@ namespace hse
         std::size_t CountVisited() const { return count_visited_; }
 
         // returns the number of planets in world currently
-        std::size_t WorldSize() const { return galaxy_.size(); }
+        std::size_t WorldSize() const { return galaxy_.size()+count_unbinded_portals_; }
 
         auto& planetByIdx(std::size_t idx) & { return galaxy_[idx]; }
         const auto& planetByIdx(std::size_t idx) const & { return galaxy_[idx]; }
 
+        // Randomly connetcs currnet unbinded portals
+        // The unbinded portals may left ater this operation
+        void connectCurrnet();
+
+        // If there is nonbinded portals in galaxy then
+        // will be created oneway planets and bindede with
+        // those portal respectively
+        void makeFinit();
+
         // Travels to the next planet
-        virtual std::int32_t Travel(std::int32_t planet_idx, std::size_t to_idx) {return galaxy_[planet_idx].Travel(to_idx); }
+        std::int32_t Travel(std::int32_t planet_idx, std::size_t to_idx);
 
         // Returns true if victory condition granted
-        virtual bool isVictory() const {return true; }
+        bool isVictory() const { return this->CountVisited()==this->WorldSize() && count_unbinded_portals_==0; }
 
-        NOP_STRUCTURE(world_base, galaxy_, count_visited_);
-    };
-
-
-    // world with finit number of planets
-    // it is guarantee that there will be no unbidnded portals
-    class SimpleWorld: public world_base
-    {
-
-    public:
-
-        // Generate world generation with 10..20 planets
-        SimpleWorld();
-
-        // Generate world with at least size planets and no more than size+7 planets
-        SimpleWorld(std::size_t);
-
-        virtual ~SimpleWorld() = default;
-
-        //Travels to the next planet and marks it as visited if needed
-        virtual std::int32_t Travel(std::int32_t, std::size_t) override;
-        virtual bool isVictory() const override { return this->CountVisited()==this->WorldSize(); }
-
-        virtual std::string getPlanetPrefix(hse::planet &_planet);
-
-        NOP_STRUCTURE(SimpleWorld);
-    };
-
-
-    // infinitly growing tree-like world
-    class InfiniteWorld: public world_base
-    {
-
-    public:
-        InfiniteWorld();
-        virtual ~InfiniteWorld()=default;
-
-        // Travels to the next planet
-        virtual std::int32_t Travel(std::int32_t, std::size_t) override;
-        virtual bool isVictory() const override { return false; }
-
-        NOP_STRUCTURE(InfiniteWorld);
+        NOP_STRUCTURE(world, galaxy_, count_visited_, count_unbinded_portals_);
     };
 
 }

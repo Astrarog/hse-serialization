@@ -39,7 +39,7 @@ auto Die() { return nop::Die(std::cerr); }
 
 TEST_CASE("Serialization 5") {
 BENCHMARK_ADVANCED("Serrialozation with wolrd of about 5 planet")(Catch::Benchmark::Chronometer meter) {
-    hse::SimpleWorld world(5);
+    hse::world world(5);
 
     using Writer = nop::StreamWriter<std::stringstream>;
     nop::Serializer<Writer> serializer;
@@ -60,7 +60,7 @@ BENCHMARK_ADVANCED("Serrialozation with wolrd of about 5 planet")(Catch::Benchma
 
 TEST_CASE("Serialization 20") {
 BENCHMARK_ADVANCED("Serrialozation with wolrd of about 20 planet")(Catch::Benchmark::Chronometer meter) {
-    hse::SimpleWorld world(20);
+    hse::world world(20);
 
     using Writer = nop::StreamWriter<std::stringstream>;
     nop::Serializer<Writer> serializer;
@@ -81,7 +81,7 @@ BENCHMARK_ADVANCED("Serrialozation with wolrd of about 20 planet")(Catch::Benchm
 
 TEST_CASE("Serialization 50") {
 BENCHMARK_ADVANCED("Serrialozation with wolrd of about 50 planet")(Catch::Benchmark::Chronometer meter) {
-    hse::SimpleWorld world(50);
+    hse::world world(50);
 
     using Writer = nop::StreamWriter<std::stringstream>;
     nop::Serializer<Writer> serializer;
@@ -102,7 +102,7 @@ BENCHMARK_ADVANCED("Serrialozation with wolrd of about 50 planet")(Catch::Benchm
 
 TEST_CASE("Serialization 100") {
 BENCHMARK_ADVANCED("Serrialozation with wolrd of about 100 planet")(Catch::Benchmark::Chronometer meter) {
-    hse::SimpleWorld world(100);
+    hse::world world(100);
 
     using Writer = nop::StreamWriter<std::stringstream>;
     nop::Serializer<Writer> serializer;
@@ -123,7 +123,7 @@ BENCHMARK_ADVANCED("Serrialozation with wolrd of about 100 planet")(Catch::Bench
 
 TEST_CASE("Serialization 500") {
 BENCHMARK_ADVANCED("Serrialozation with wolrd of about 500 planet")(Catch::Benchmark::Chronometer meter) {
-    hse::SimpleWorld world(500);
+    hse::world world(500);
 
     using Writer = nop::StreamWriter<std::stringstream>;
     nop::Serializer<Writer> serializer;
@@ -144,7 +144,7 @@ BENCHMARK_ADVANCED("Serrialozation with wolrd of about 500 planet")(Catch::Bench
 
 TEST_CASE("Serialization 1500") {
 BENCHMARK_ADVANCED("Serrialozation with wolrd of about 1500 planet")(Catch::Benchmark::Chronometer meter) {
-    hse::SimpleWorld world(1500);
+    hse::world world(1500);
 
     using Writer = nop::StreamWriter<std::stringstream>;
     nop::Serializer<Writer> serializer;
@@ -165,7 +165,7 @@ BENCHMARK_ADVANCED("Serrialozation with wolrd of about 1500 planet")(Catch::Benc
 
 TEST_CASE("Serialization 3200") {
 BENCHMARK_ADVANCED("Serrialozation with wolrd of about 3200 planet")(Catch::Benchmark::Chronometer meter) {
-    hse::SimpleWorld world(3200);
+    hse::world world(3200);
 
     using Writer = nop::StreamWriter<std::stringstream>;
     nop::Serializer<Writer> serializer;
@@ -186,7 +186,7 @@ BENCHMARK_ADVANCED("Serrialozation with wolrd of about 3200 planet")(Catch::Benc
 
 TEST_CASE("Serialization 7000") {
 BENCHMARK_ADVANCED("Serrialozation with wolrd of about 7000 planet")(Catch::Benchmark::Chronometer meter) {
-    hse::SimpleWorld world(7000);
+    hse::world world(7000);
 
     using Writer = nop::StreamWriter<std::stringstream>;
     nop::Serializer<Writer> serializer;
@@ -207,7 +207,7 @@ BENCHMARK_ADVANCED("Serrialozation with wolrd of about 7000 planet")(Catch::Benc
 
 TEST_CASE("Serialization 15000") {
 BENCHMARK_ADVANCED("Serrialozation with wolrd of about 15000 planet")(Catch::Benchmark::Chronometer meter) {
-    hse::SimpleWorld world(15000);
+    hse::world world(15000);
 
     using Writer = nop::StreamWriter<std::stringstream>;
     nop::Serializer<Writer> serializer;

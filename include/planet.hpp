@@ -56,7 +56,6 @@ namespace hse
 
         TYPE type_;
 
-        NOP_STRUCTURE(planet, name_, color_, is_visited_, show_new_planet_, empty_portals_count_, portals_, type_);
     public:
 
         // helper function for ascii graphisc
@@ -66,15 +65,15 @@ namespace hse
         // return the next planet index taken by the index in portals_
         std::int32_t Travel(std::size_t index)
         {
-            assert(index < this->portals_count());
+            assert(index < this->portalsCount());
             return portals_[index];
         }
 
         //simple getters below
         std::string name() const { return name_; }
         color Color() const { return color_; }
-        std::size_t empty_portals_count() const { return empty_portals_count_;}
-        std::size_t portals_count() const { return portals_.size();}
+        std::size_t emptyPortalsCount() const { return empty_portals_count_;}
+        std::size_t portalsCount() const { return portals_.size();}
 
         const auto& portals() const & { return portals_; }
         auto& portals() & { return portals_; }
@@ -115,7 +114,9 @@ namespace hse
         bool operator!=(const planet& other) const { return std::tuple(name_, color_) != std::tuple(other.name_, other.color_); }
         bool operator< (const planet& other) const { return std::tuple(name_, color_) <  std::tuple(other.name_, other.color_); }
 
-        // return random planet
+
+        NOP_STRUCTURE(planet, name_, color_, is_visited_, show_new_planet_, empty_portals_count_, portals_, type_);
+
     };
 
     extern planet generatePlanet();

@@ -1,4 +1,5 @@
 #include "world.hpp"
+#include "random.hpp"
 #include "input_handler.hpp"
 
 #include <fstream>
@@ -8,7 +9,7 @@
 #include <ios>
 #include <filesystem>
 #include <cassert>
-#include <memory>
+#include <random>
 
 #include <nop/serializer.h>
 #include <nop/utility/die.h>
@@ -64,7 +65,7 @@ progress global_progress{};
 
 
 [[noreturn]]
-void exit_commandor()
+void exitCommandor()
 {
     std::cout << "Fair enough! Goodbye, Commander.\n";
     std::exit(0);
@@ -73,20 +74,30 @@ void exit_commandor()
 // Sends fatal errors to std::cerr.
 auto Die() { return nop::Die(std::cerr); }
 
-void save_game(std::shared_ptr<hse::world_base> world)
+void deleteSaveFile()
+{
+    if(fs::exists(saveFileName))
+    {
+//        fs::create_directories(saveFileName);
+        bool success = fs::remove(saveFileName);
+        assert(success);
+    }
+}
+
+void saveGame(hse::world world)
 {
     using Writer = nop::StreamWriter<std::stringstream>;
     nop::Serializer<Writer> serializer;
 
     serializer.Write(global_progress) || Die();
-    serializer.Write(*world) || Die();
+    serializer.Write(world) || Die();
 
     std::string data = serializer.writer().stream().str();
     std::ofstream file(saveFileName);
     file << data;
 }
 
-std::shared_ptr<hse::world_base> load_game()
+hse::world loadGame()
 {
     std::string data_raw;
     std::ifstream file(saveFileName, std::ios::binary | std::ios::out | std::ios::app);
@@ -102,21 +113,21 @@ std::shared_ptr<hse::world_base> load_game()
 
     deserializer.Read(&global_progress) || Die();
 
-    auto* data = new hse::world_base;
-    deserializer.Read(data) || Die();
+    hse::world data;
+    deserializer.Read(&data) || Die();
 
-    return std::shared_ptr<hse::world_base>(data);
+    return data;
 }
 
-void playGame(std::shared_ptr<hse::world_base> world)
+void playGame(hse::world& world)
 {
-    std::size_t current_idx = world->homeIdx();
-    while(!(world->isVictory()))
+    std::size_t current_idx = world.homeIdx();
+    while(!(world.isVictory()))
     {
-        hse::planet& current = world->planetByIdx(current_idx);
+        hse::planet& current = world.planetByIdx(current_idx);
 
         hse::input_choises_handler travel_input
-                (world->getPlanetChoises(current), world->getPlanetPrefix(current), "Where should we travel?");
+                (world.getPlanetChoises(current), delimeter+world.getPlanetPrefix(current), "Where should we travel?");
 
         std::string answer = std::string(travel_input.perform());
         std::size_t next_idx;
@@ -129,9 +140,9 @@ void playGame(std::shared_ptr<hse::world_base> world)
             std::string_view answer = save_input.perform();
             if(answer == "yes")
             {
-                save_game(world);
+                saveGame(world);
             }
-            exit_commandor();
+            exitCommandor();
         }
         else
         {
@@ -140,8 +151,7 @@ void playGame(std::shared_ptr<hse::world_base> world)
             --next_idx;
         }
 
-        current_idx = world->Travel(current_idx, next_idx);
-        std::cout << delimeter;
+        current_idx = world.Travel(current_idx, next_idx);
     }
 
     std::cout << '\n' << delimeter;
@@ -149,12 +159,7 @@ void playGame(std::shared_ptr<hse::world_base> world)
     std::cout << "\nYou have successfully complited the mission!\n";
     std::cout << "\nNevertheless The Supreme Council have another one.\n\n";
 
-    if(fs::exists(saveFileName))
-    {
-        fs::create_directories(saveFileName);
-        bool success = fs::remove(saveFileName);
-        assert(success);
-    }
+    deleteSaveFile();
 
 }
 
@@ -179,72 +184,70 @@ int main()
                   << "Thank you, Commander! Humanity is in your hands.\n"
                   << delimeter;
 
-        std::string mode = "n";
 
-        // use shared_ptr
-        std::shared_ptr<hse::world_base> world;
-        if(global_progress.achievedRespect())
+        hse::world world{};
+
+        std::string load="no";
+        if(fs::exists(saveFileName))
         {
-            if(global_progress.firstAchieve())
+
+            hse::input_choises_handler load_input(
+            {{"yes", "Load the mission"},
+             {"no" , "Delete the progress"},
+             {"q" , "Quit"}},
+                        "We have found you previous mission.", "Would you like to load?");
+            load = load_input.perform();
+            if(load == "yes")
+            {
+                world = loadGame();
+            }
+            else if (load == "no")
+            {
+                deleteSaveFile();
+            }
+            else
+            {
+                exitCommandor();
+            }
+        }
+        if(load=="no")
+        {
+            std::string mode = "n";
+            if(global_progress.achievedRespect())
+            {
+                if(global_progress.firstAchieve())
+                {
+                    std::cout << infitityAnons;
+                }
+                hse::input_choises_handler mode_input(
+                {{"n", "Normal mode"},
+                 {"i" , "Infinite mode"},
+                 {"h" , "Help"},
+                 {"q" , "Quit"}},
+                            "", "");
+                mode = mode_input.perform();
+
+            }
+            if(mode == "h")
             {
                 std::cout << infitityAnons;
             }
-            hse::input_choises_handler mode_input(
-            {{"n", "Normal mode"},
-             {"i" , "Infinite mode"},
-             {"h" , "Help"},
-             {"q" , "Quit"}},
-                        "", "");
-            mode = mode_input.perform();
-
-        }
-        if(mode == "h")
-        {
-            std::cout << infitityAnons;
-        }
-        else if(mode == "q")
-        {
-            exit_commandor();
-        }
-        else
-        {
-            std::string load;
-            if(fs::exists(saveFileName))
+            else if(mode == "q")
             {
-
-                hse::input_choises_handler load_input(
-                {{"yes", "Load the mission"},
-                 {"no" , "Infinite mode"},
-                 {"q" , "Quit"}},
-                            "We have found you previous mission.", "Would you like to load?");
-                load = load_input.perform();
-                if(mode == "yes")
-                {
-                    world = load_game();
-                }
-                else if(mode == "q")
-                {
-                    exit_commandor();
-                }
-            }
-            if(load=="no")
+                exitCommandor();
+            }else if(mode == "n")
             {
-
-                if(mode == "n")
-                {
-                    world = std::make_shared<hse::SimpleWorld>();
-                }
-                else if (mode == "i")
-                {
-                    world = std::make_shared<hse::InfiniteWorld>();
-                }
+                std::size_t world_size = std::uniform_int_distribution<std::size_t>(10, 20)(hse::randomGenerator);
+                world.generatePlanets(world_size);
+                world.connectCurrnet();
+                world.makeFinit();
             }
-            playGame(world);
-            global_progress.addWin();
         }
+        playGame(world);
+        global_progress.addWin();
     }
 
-    exit_commandor();
+    exitCommandor();
 }
 
 
