@@ -10,7 +10,7 @@ namespace hse {
 
 std::string_view input_choises_handler::perform() const
 {
-    std::cout << prefix << '\n' << '\n';
+    std::cout << prefix << '\n';
 
     for (const auto& [opt, description] : choises)
     {
@@ -21,7 +21,7 @@ std::string_view input_choises_handler::perform() const
     {
         std::cout << input_invitation << ' ' << all_options << ' ';
 
-        std::string answer;
+        std::string answer="";
         std::getline(std::cin, answer);
 
         if(!(std::cin))
@@ -32,7 +32,7 @@ std::string_view input_choises_handler::perform() const
         for (const auto& [opt, _] : choises)
         {
             auto pos = std::mismatch(answer.begin(), answer.end(), opt.begin());
-            if(pos.first == answer.end())
+            if(pos.first == answer.end() && answer != "")
                 return opt;
         }
 

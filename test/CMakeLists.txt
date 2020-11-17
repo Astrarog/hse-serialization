@@ -1,4 +1,4 @@
-add_executable(${PROJECT_NAME}-test tests.cpp test_runner.hpp)
+add_executable(${PROJECT_NAME}-test tests.cpp)
 
 target_compile_features(${PROJECT_NAME}-test PRIVATE cxx_std_20)
 

@@ -29,7 +29,7 @@ namespace hse
         out << "NAME : " <<_planet.name()  << "\n";
         out << "COLOR: " <<_planet.Color() << "\n"
                                              << "\n";
-        out << "\n  [Our intelligence reports that we have found " << CountVisited() << " out of " << WorldSize() << "]\n\n";
+        out << "\n  [Our intelligence reports that we have found " << CountVisited() << " out of " << WorldCapacity() << "]\n\n";
         out << "Possible next hops:\n";
 
         return out.str();
@@ -218,5 +218,11 @@ namespace hse
             next.markVisited();
         }
         return next_idx;
+    }
+
+    void world::addEmptyPortal(std::int32_t planet_idx)
+    {
+        galaxy_[planet_idx].addEmptyPortal();
+        ++count_unbinded_portals_;
     }
 }

@@ -46,7 +46,10 @@ namespace hse
         std::size_t CountVisited() const { return count_visited_; }
 
         // returns the number of planets in world currently
-        std::size_t WorldSize() const { return galaxy_.size()+count_unbinded_portals_; }
+        std::size_t WorldSize() const { return galaxy_.size(); }
+
+        // returns the number of planets in world and the number of portals
+        std::size_t WorldCapacity() const { return galaxy_.size() + count_unbinded_portals_ ;}
 
         auto& planetByIdx(std::size_t idx) & { return galaxy_[idx]; }
         const auto& planetByIdx(std::size_t idx) const & { return galaxy_[idx]; }
@@ -59,6 +62,9 @@ namespace hse
         // will be created oneway planets and bindede with
         // those portal respectively
         void makeFinit();
+
+        //add empty portal to the planet provided by index in galaxy
+        void addEmptyPortal(std::int32_t planet_idx);
 
         // Travels to the next planet
         std::int32_t Travel(std::int32_t planet_idx, std::size_t to_idx);
