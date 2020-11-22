@@ -1,4 +1,4 @@
-Test type,World type,Mean time,Mean low, Mean max
+Test type,World size,Mean time,Mean min,Mean max
 SR,2,3.67751 us,3.59364 us,3.80351 us
 SR,4,7.83747 us,7.71134 us,8.05124 us
 SR,8,11.7448 us,11.41 us,12.3416 us
