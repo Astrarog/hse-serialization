@@ -6,13 +6,20 @@ set_target_properties(${PROJECT_NAME}-test PROPERTIES CXX_EXTENSIONS OFF)
 
 target_link_libraries(${PROJECT_NAME}-test PRIVATE ${PROJECT_NAME}-lib)
 
-find_package(Catch2 2.13.3 REQUIRED)
+# try to find system Catch
+find_package(Catch2 2.13.3)
+if(NOT Catch2_FOUND)
+    add_subdirectory(${CMAKE_SOURCE_DIR}/lib/Catch2 ${CMAKE_BINARY_DIR}/Catch2)
+endif()
 
 find_package(Libnop REQUIRED)
 
 target_link_libraries(${PROJECT_NAME}-test PRIVATE Catch2::Catch2)
 
 target_link_libraries(${PROJECT_NAME}-test PRIVATE Libnop::Libnop)
+
+# add catch2 cmake scripts for bundling
+list(APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/lib/Catch2/contrib")
 
 include(CTest)
 include(Catch)

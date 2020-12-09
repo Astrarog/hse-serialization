@@ -1,0 +1,6 @@
+[submodule "lib/libnop"]
+	path = lib/libnop
+	url = https://github.com/google/libnop.git
+[submodule "lib/Catch2"]
+	path = lib/Catch2
+	url = https://github.com/catchorg/Catch2.git

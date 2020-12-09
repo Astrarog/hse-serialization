@@ -3,7 +3,11 @@ cmake_minimum_required(VERSION 3.16 FATAL_ERROR)
 project(hse-serialization
             VERSION 1.0.0
             DESCRIPTION "HSE serialization task. Persistent world game."
-            LANGUAGES CXX)
+            LANGUAGES CXX
+)
+
+# add git submodule directory to cmake search
+list(APPEND CMAKE_PREFIX_PATH "${CMAKE_CURRENT_SOURCE_DIR}/lib/libnop")
 
 # finding libnop
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
@@ -23,7 +27,6 @@ set_target_properties(${PROJECT_NAME}-lib PROPERTIES CXX_EXTENSIONS OFF)
 
 target_include_directories(${PROJECT_NAME}-lib
     PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include
-    PRIVATE "${Libnop_INCLUDE_DIR}"
 )
 
 #gui part of the project
@@ -36,7 +39,6 @@ set_target_properties(${PROJECT_NAME}-game PROPERTIES CXX_EXTENSIONS OFF)
 
 target_include_directories(${PROJECT_NAME}-game
     PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/include
-    PRIVATE "${Libnop_INCLUDE_DIR}"
 )
 
 target_link_libraries(${PROJECT_NAME}-lib PRIVATE Libnop::Libnop)

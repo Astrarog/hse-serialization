@@ -74,15 +74,15 @@ void measure_serialization(Catch::Benchmark::Chronometer& meter, std::size_t wor
     std::string data = serializer.writer().stream().str();
 
     std::stringstream ss;
-    ss << world.WorldSize() << isConnected? ".con" :".raw";
+    ss << world.WorldSize() << (isConnected? ".con" :".raw");
     std::ofstream file(ss.str());
     file << data;
 }
 
-void measaure_deserialization(Catch::Benchmark::Chronometer& meter, std::size_t world_size, bool isConnected=false)
+void measure_deserialization(Catch::Benchmark::Chronometer& meter, std::size_t world_size, bool isConnected=false)
 {
 	std::stringstream ss;
-	ss << world_size << isConnected?".con":".raw";
+    ss << world_size << (isConnected?".con":".raw");
 	std::string saveFileName = ss.str();
 	
 	std::string data_raw;
@@ -106,25 +106,25 @@ void measaure_deserialization(Catch::Benchmark::Chronometer& meter, std::size_t 
 	});
 }
 
-#define SERIALIZATION_RAW_TEST(size): \
+#define SERIALIZATION_RAW_TEST(size) \
     BENCHMARK_ADVANCED("Raw world with size planets")(Catch::Benchmark::Chronometer meter) { \
 		measure_serialization(meter, size); \
-    };
+    }
 
-#define SERIALIZATION_CON_TEST(size): \
+#define SERIALIZATION_CON_TEST(size) \
     BENCHMARK_ADVANCED("Connected world with size planets")(Catch::Benchmark::Chronometer meter) { \
 		measure_serialization(meter, size, true); \
-    };
+    }
 
-#define DESERIALIZATION_RAW_TEST(size): \
+#define DESERIALIZATION_RAW_TEST(size) \
     BENCHMARK_ADVANCED("Raw world with size planets")(Catch::Benchmark::Chronometer meter) { \
 		measure_deserialization(meter, size); \
-    };
+    }
 
-#define DESERIALIZATION_CON_TEST(size): \
+#define DESERIALIZATION_CON_TEST(size) \
     BENCHMARK_ADVANCED("Connected world with size planets")(Catch::Benchmark::Chronometer meter) { \
 		measure_deserialization(meter, size, true); \
-    };
+    }
 
 TEST_CASE("Serialization testof raw world", "[serialization][raw]") {
     SERIALIZATION_RAW_TEST(2);
