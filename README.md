@@ -18,11 +18,20 @@
 
 ## Сборка и запуск
 
-#### Сборка проекта
+#### Скачивание зависимостей
 ```sh
 git clone https://github.com/Astrarog/hse-serialization.git
 cd hse-serialization
+```
+Если у Вас в системе не имеется используемых библиотек, или Вы не хотите использовать их, то команды используйте команды ниже, чтобы получить необходимые зависимости.  
 
+```sh
+git submodule init
+git submodule update
+```
+
+#### Сборка проекта
+```sh
 cmake -B build 
 cmake --build build
 ```
