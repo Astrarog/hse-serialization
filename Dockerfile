@@ -19,11 +19,8 @@ RUN git submodule init
 RUN git submodule update
 
 RUN cmake \
-
     -DCMAKE_BUILD_TYPE=Debug \
-
     -DCMAKE_CXX_FLAGS="-std=c++17" \
-
     -B build -G Ninja
 
 RUN cmake --build build
