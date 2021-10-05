@@ -113,11 +113,12 @@ namespace hse
         }
         for(std::int32_t connected_planet_idx :_planet.portals())
         {
-            connectPlanets(data, connected_planet_idx, pool, count_unbinded);
+            if(connected_planet_idx != -1)
+                connectPlanets(data, connected_planet_idx, pool, count_unbinded);
         }
     }
 
-    void world::connectCurrnet()
+    world& world::connectCurrnet()
     {
         std::vector<std::int32_t> connectivity_parts;
 
@@ -147,12 +148,16 @@ namespace hse
             bindWithPortal(first, first_idx,
                            second, second_idx);
         }
+	return *this;
     }
 
-    void world::makeFinit()
+    world& world::makeFinit()
     {
         auto hasEmptyPortal = [](const planet& e){ return e.hasEmptyPortal(); };
         std::vector<std::int32_t> pool = filter(galaxy_, hasEmptyPortal);
+
+        if(pool.size()==0)
+            return *this;
 
         std::int32_t last_planet_idx = pool.back();
         while(galaxy_[last_planet_idx].hasEmptyPortal())
@@ -169,15 +174,17 @@ namespace hse
         // At this parts there should be no empty portals left
         assert(filter(galaxy_, pool, hasEmptyPortal).size()==0);
         assert(count_unbinded_portals_==0);
+	return *this;
     }
 
-    void world::generatePlanets(std::size_t size)
+    world& world::generatePlanets(std::size_t size)
     {
         for(std::size_t i = 0; i<size; ++i)
         {
             galaxy_.push_back(generatePlanet());
             count_unbinded_portals_ += galaxy_.back().emptyPortalsCount();
         }
+	return *this;
     }
 
     world::world(std::size_t size)
@@ -220,9 +227,10 @@ namespace hse
         return next_idx;
     }
 
-    void world::addEmptyPortal(std::int32_t planet_idx)
+    world& world::addEmptyPortal(std::int32_t planet_idx)
     {
         galaxy_[planet_idx].addEmptyPortal();
         ++count_unbinded_portals_;
+	return *this;
     }
 }

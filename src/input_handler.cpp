@@ -24,15 +24,14 @@ std::string_view input_choises_handler::perform() const
         std::string answer="";
         std::getline(std::cin, answer);
 
-        if(!(std::cin))
+        if(!(std::cin) || answer=="")
         {
             throw std::runtime_error("input error");
         }
 
         for (const auto& [opt, _] : choises)
         {
-            auto pos = std::mismatch(answer.begin(), answer.end(), opt.begin());
-            if(pos.first == answer.end() && answer != "")
+            if (opt.rfind(answer, 0) == 0)
                 return opt;
         }
 

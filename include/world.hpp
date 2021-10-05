@@ -29,7 +29,7 @@ namespace hse
         world(std::size_t);
 
         // adds the provided number of planets to currnet world
-        void generatePlanets(std::size_t);
+        world& generatePlanets(std::size_t);
 
         // Simple getters
         const auto& galaxy() const & { return galaxy_; }
@@ -56,15 +56,16 @@ namespace hse
 
         // Randomly connetcs currnet unbinded portals
         // The unbinded portals may left ater this operation
-        void connectCurrnet();
+        world& connectCurrnet();
 
         // If there is nonbinded portals in galaxy then
         // will be created oneway planets and bindede with
         // those portal respectively
-        void makeFinit();
+        world& makeFinit();
 
         //add empty portal to the planet provided by index in galaxy
-        void addEmptyPortal(std::int32_t planet_idx);
+        world& addEmptyPortal(std::int32_t planet_idx);
+	
 
         // Travels to the next planet
         std::int32_t Travel(std::int32_t planet_idx, std::size_t to_idx);
