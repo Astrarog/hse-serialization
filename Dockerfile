@@ -27,4 +27,4 @@ RUN cmake --build build
 
 WORKDIR build
 
-ENTRYPOINT ./hse-serialization-game
+ENTRYPOINT /bin/bash
